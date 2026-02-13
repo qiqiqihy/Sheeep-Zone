@@ -1,0 +1,11 @@
+site_name: Sheeep's Zone
+site_url: https://qiqiqihy.github.io/Sheeep-Zone/
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - search.suggest
+
+nav:
+  - Home: index.md
