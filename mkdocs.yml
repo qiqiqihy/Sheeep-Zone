@@ -9,7 +9,10 @@ theme:
 
 nav:
   - Home: index.md
-  - SLAM Basics - SIFT: SLAM-Basics-SIFT.md
+  - SLAM Basics:
+      - SIFT: SLAM-Basics-SIFT.md
+      - GFTT: SLAM-Basics-GFTT.md
+      - SURF: SLAM-Basics-SURF.md
 
 markdown_extensions:
   - footnotes
