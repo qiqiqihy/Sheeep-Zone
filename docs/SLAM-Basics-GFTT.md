@@ -1,4 +1,4 @@
-# SLAM Basics | GFTT（Good Features to Track）
+# <span class="topic-label">SLAM Basics</span> | GFTT（Good Features to Track）
 
 ## 1. 理论基础
 

@@ -6,13 +6,25 @@ theme:
   features:
     - navigation.tabs
     - search.suggest
+  font:
+    text: Noto Sans SC
+    code: Roboto Mono
 
 nav:
   - Home: index.md
   - SLAM Basics:
-      - SIFT: SLAM-Basics-SIFT.md
+      - SIFT特征: SLAM-Basics-SIFT.md
       - GFTT: SLAM-Basics-GFTT.md
       - SURF: SLAM-Basics-SURF.md
 
 markdown_extensions:
   - footnotes
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js

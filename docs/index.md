@@ -5,6 +5,6 @@
 ## 文档导航
 
 - SLAM Basics
-	- [SIFT](SLAM-Basics-SIFT.md)
-	- [GFTT](SLAM-Basics-GFTT.md)
-	- [SURF](SLAM-Basics-SURF.md)
+    - [SIFT特征](SLAM-Basics-SIFT.md)
+    - [GFTT](SLAM-Basics-GFTT.md)
+    - [SURF](SLAM-Basics-SURF.md)
