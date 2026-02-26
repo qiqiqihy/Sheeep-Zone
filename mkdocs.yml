@@ -1,5 +1,7 @@
 site_name: Sheeep's Zone
 site_url: https://qiqiqihy.github.io/Sheeep-Zone/
+site_author: qiqiqihy
+site_description: A blog about SLAM and more.
 
 theme:
   name: material
