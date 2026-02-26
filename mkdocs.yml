@@ -18,10 +18,14 @@ nav:
       - SURF: SLAM-Basics-SURF.md
 
 markdown_extensions:
+  - attr_list
+  - md_in_html
   - footnotes
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.blocks.caption
+  - pymdownx.snippets
   - pymdownx.arithmatex:
       generic: true
 

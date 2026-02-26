@@ -23,3 +23,18 @@ h3, h4, h5, h6 { font-weight: 600 !important; }
 .md-sidebar--secondary .md-nav__title {
   display: none;
 }
+
+/* 全局正文行间距（仅内容区） */
+.md-typeset p,
+.md-typeset li,
+.md-typeset blockquote,
+.md-typeset td {
+  line-height: 2.0;
+  text-align: justify;
+  text-justify: inter-ideograph;
+}
+
+/* 全局正文首行缩进（仅段落） */
+.md-typeset p {
+  text-indent: 0em;
+}

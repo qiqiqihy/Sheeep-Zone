@@ -56,6 +56,13 @@ D(x,y,\sigma)&=(G(x,y,k\sigma)-G(x,y,\sigma))*I(x,y)\\[5pt]
 
     由于$k-1$为常数，其不影响局部极值位置，当$k\to1$时，近似误差$\to0$。
 
+DoH函数的构造如[图1](#fig-doh)所示，首先将初始图像与Gaussian核卷积，在尺度空间中生成由常数因子$k$分隔的图像。
+
+<figure id="fig-doh" markdown="span">
+    ![fig-doh](images/sift-doh.png){width="500"}
+    <figcaption>图1 DoH函数构造</figcaption>
+</figure>
+
 ## 2. OpenCV实现
 
 OpenCV 在 `features2d` 模块中提供了 SIFT 的检测与描述接口，可以直接用于关键点提取和匹配[^opencv_sift]。
