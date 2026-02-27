@@ -60,7 +60,17 @@ DoH函数的构造如[图1](#fig-doh)所示，首先将初始图像与Gaussian�
 
 <figure id="fig-doh" markdown="span">
     ![fig-doh](images/sift-doh.png){width="500"}
-    <figcaption>图1 DoH函数构造</figcaption>
+    <figcaption>DoH函数构造</figcaption>
+</figure>
+
+<figure id="fig-doh-test1" markdown="span">
+    ![fig-doh](images/sift-doh.png){width="500"}
+    <figcaption>测试自动编号1</figcaption>
+</figure>
+
+<figure id="fig-doh-test2" markdown="span">
+    ![fig-doh](images/sift-doh.png){width="500"}
+    <figcaption>测试自动编号2</figcaption>
 </figure>
 
 ## 2. OpenCV实现

@@ -38,3 +38,18 @@ h3, h4, h5, h6 { font-weight: 600 !important; }
 .md-typeset p {
   text-indent: 0em;
 }
+
+/* 图片标题自动编号（每篇文档内独立计数） */
+.md-content__inner {
+  counter-reset: figure;
+}
+
+.md-typeset figure {
+  counter-increment: figure;
+}
+
+.md-typeset figure > figcaption::before {
+  content: "图" counter(figure) " ";
+  color: inherit;
+  font-weight: inherit;
+}
