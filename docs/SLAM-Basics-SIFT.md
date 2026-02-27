@@ -56,22 +56,33 @@ D(x,y,\sigma)&=(G(x,y,k\sigma)-G(x,y,\sigma))*I(x,y)\\[5pt]
 
     由于$k-1$为常数，其不影响局部极值位置，当$k\to1$时，近似误差$\to0$。
 
-DoH函数的构造如[图](#fig-doh){.fig-ref}所示，首先将初始图像与Gaussian核卷积，在尺度空间中生成由常数因子$k$分隔的图像。
+DoG函数的构造如[图](#fig-dog){.fig-ref}所示，具体步骤如下：
 
-<figure id="fig-doh" markdown="span">
-    ![fig-doh](images/sift-doh.png){width="500"}
-    <figcaption>DoH函数构造</figcaption>
+1. **尺度空间划分：**将每个倍频程（Octave，即尺度$\sigma$翻倍的过程）划分为$s$个等比间隔，确定相邻尺度的比例因子$k=2^{\frac{1}{s}}$。
+
+2. **增量式Gaussian卷积：**在每个倍频程中，对初始图像进行增量式Gaussian卷积，生成$s+3$张图像，即$s+3$层（Layer）。
+
+3. **计算DoG：**将相邻层图像作差，得到$s+2$张DoG图像，用于后续的局部极值检测。
+
+4. **倍频程迭代：**一个倍频程处理完后，选取其中尺度$\sigma$为初始值$2$倍的高斯图像（第$s$层），进行隔行隔列采样，作为下一个倍频程的初始图像。第$0$个倍频程的初始图像即为原始图像。
+
+<figure id="fig-dog" markdown="span">
+    ![fig-dog](images/sift-dog.png){width="75%"}
+    <figcaption>DoG函数构造</figcaption>
 </figure>
 
-<figure id="fig-doh-test1" markdown="span">
-    ![fig-doh](images/sift-doh.png){width="500"}
-    <figcaption>测试自动编号1</figcaption>
+DoG函数构造完成后，按照[图](#fig-extrema){.fig-ref}中的方式筛选局部极值点作为候选特征点，即候选特征点的响应值（DoG函数在该像素处的值）大于或小于上下两层和本层中相邻的26个点的响应值。
+
+<figure id="fig-extrema" markdown="span">
+    ![fig-extrema](images/sift-extrema.png){width="75%"}
+    <figcaption>DoG局部极值</figcaption>
 </figure>
 
-<figure id="fig-doh-test2" markdown="span">
-    ![fig-doh](images/sift-doh.png){width="500"}
-    <figcaption>测试自动编号2</figcaption>
-</figure>
+为了提取更多候选特征点，可对原始图像上采样作为第$0$个倍频程的初始图像，即用线性插值将原始图像的长宽各扩大$2$倍。假设原始图像的尺度为$\sigma=0.5$（防止混叠的最小值），则上采样图像的等效尺度为$\sigma=1.0$，无需额外平滑即可直接用于构造DoG函数。
+
+### 1.3 特征点细化
+
+
 
 ## 2. OpenCV实现
 
