@@ -82,7 +82,100 @@ DoG函数构造完成后，按照[图](#fig-extrema){.fig-ref}中的方式筛选
 
 ### 1.3 特征点细化
 
+对候选特征点进一步细化，可提高特征点稳定性且更易于匹配，为此，考虑DoG函数的二阶Taylor展开，即：
 
+\[
+D(x,y,\sigma)=D(\mathbf{x})\approx D(\mathbf{x}_0)+\frac{\partial D^\top}{\partial\mathbf{x}}(\mathbf{x}-\mathbf{x}_0)+\frac{1}{2}(\mathbf{x}-\mathbf{x}_0)^\top\frac{\partial^2D}{\partial\mathbf{x}^2}(\mathbf{x}-\mathbf{x}_0)
+\]
+
+其中$\mathbf{x}\triangleq(x,y,\sigma)^\top$，$\mathbf{x}_0$为上一步得到的候选特征点位置。定义$\delta\mathbf{x}=\mathbf{x}-\mathbf{x}_0$，令DoG函数二阶Taylor展开式关于$\delta\mathbf{x}$的导数为$0$，解得最优增量$\delta\mathbf{x}^*$：
+
+\[
+\delta\mathbf{x}^*=-\frac{\partial^2 D}{\partial\mathbf{x}^2}^{-1}\frac{\partial D}{\partial \mathbf{x}}
+\]
+
+实现时，$\frac{\partial D}{\partial\mathbf{x}}$和$\frac{\partial^2 D}{\partial\mathbf{x}^2}$由候选点位置$\mathbf{x}_0$与相邻像素的差分近似获取。若解得$\delta\mathbf{x}$在任意方向上大于$0.5$说明相比候选特征点位置$\mathbf{x}_0$，DoG函数的局部极大值更接近与$\mathbf{x}_0$相邻的某个像素，此时更新候选特征点位置，再次求解$\delta\mathbf{x}$。最终细化后的特征点位置$\hat{\mathbf{x}}$及响应值$D(\hat{\mathbf{x}})$分别为：
+
+\[
+\hat{\mathbf{x}}=\mathbf{x}_0+\delta\mathbf{x}
+,\quad D(\hat{\mathbf{x}})=D+\frac{1}{2}\frac{\partial D^\top}{\partial\mathbf{x}}\hat{\mathbf{x}}
+\]
+
+响应值$D(\hat{\mathbf{x}})$低于阈值$T_\mathrm{res}$的特征点被丢弃。
+
+#### 边缘效应消除
+
+DoG函数会在跨越边缘时产生强烈的响应，SIFT作为一种斑点（Blob）特征，为提高稳定性，需要剔除边缘上的特征点。
+
+边缘上点的DoG函数会在跨越边缘方向产生较大的主曲率，同时在沿边缘方向产生较小的主曲率，利用这一特点可有效剔除边缘上的特征点。主曲率可由特征点处的Hessian矩阵$\mathbf{H}$计算：
+
+\[
+\mathbf{H}=\begin{bmatrix}D_{xx}&D_{xy}\\D_{xy}&D_{yy}\end{bmatrix}
+\]
+
+Hessian矩阵$\mathbf{H}$由特征点及其相邻像素差分近似。$\mathbf{H}$的特征值正比于主曲率，记$\alpha$和$\beta$分别为较大和较小的特征值，则有：
+
+\[
+\begin{gathered}
+\mathrm{trace}(\mathbf{H})=D_{xx}+D_{yy}=\alpha+\beta,\\
+\det(\mathbf{H})=D_{xx}D_{yy}-D_{xy}^2=\alpha\beta
+\end{gathered}
+\]
+
+若行列式$\det(\mathbf{H})$为负，则特征点并非DoG函数的极值点，直接剔除。因此只需考虑行列式$\det(\mathbf{H})$为正的情况，此时$\alpha$与$\beta$具有相同的符号，记$\alpha=r\beta$，有：
+
+\[
+\frac{\mathrm{trace}(\mathbf{H})^2}{\det(\mathbf{H})}=\frac{(\alpha+\beta)^2}{\alpha\beta}=\frac{(r\beta+\beta)^2}{r\beta^2}=\frac{(r+1)^2}{r}
+\]
+
+当特征值$\alpha=\beta$时，$\frac{(r+1)^2}{r}$取到最小值，定义阈值$T_\mathrm{edge}$，并剔除所有满足：
+
+\[
+\frac{\mathrm{trace}(\mathbf{H})}{\det(\mathbf{H})}\ge\frac{(T_{\mathrm{edge}}+1)^2}{T_{\mathrm{edge}}}
+\]
+
+的边缘特征点。
+
+### 1.4 特征点的方向计算
+
+为实现特征点的旋转不变形，根据特征点附近局部图像信息计算特征点的方向，进而在描述子计算时根据特征点的方向调整描述子的图样（Pattern）。
+
+对每个特征点，选择尺度空间中与特征点尺度最接近的层以计算方向，记该层图像为$L(x,y)$，定义梯度幅值$m(x,y)$和方向$\theta(x,y)$：
+
+\[
+\begin{gathered}
+m(x,y)=\sqrt{[L(x+1,y)-L(x-1,y)]^2+[L(x,y+1)-L(x,y-1)]^2}\\
+\theta(x,y)=\tan^{-1}\frac{L(x,y+1)-L(x,y-1)}{L(x+1,y)-L(x-1,y)}
+\end{gathered}
+\]
+
+计算特征点邻域内每个点的梯度幅值$m(x,y)$和方向$\theta(x,y)$，并在均分$360^\circ$的$36$个区间内统计$\theta(x,y)$的加权直方图，每个加入直方图的样本由梯度幅值$m(x,y)$和$1.5$倍关键点尺度的高斯核加权。
+
+直方图的最高峰及任何高于最高峰$80\%$的峰对应特征点的方向，换言之，同一尺度、同一位置的特征点可能具有多个方向。为提高精度，每个对应方向的峰与相邻两个区间的值进行抛物线拟合，作为最终的方向。
+
+### 1.5 描述子计算
+
+描述子的计算由[图](#fig-descriptor){.fig-ref}所示，具体步骤如下：
+
+1. **邻域梯度计算：**与计算方向时相似，首先选择尺度空间中与特征点尺度最接近的层，在该层上计算特征点邻域内的梯度幅值$m(x,y)$和方向$\theta(x,y)$。每一层的梯度可以预先计算以提高效率。为了实现旋转不变性，特征点邻域内的坐标和梯度方向会相对于特征点的方向进行旋转校正。
+
+2. **高斯加权：**使用$\sigma$为窗口宽度一半的高斯核为梯度幅值$m(x,y)$加权邻域内每个采样点，此操作一方面可以避免窗口位置微小变化导致的描述子突变；另一方面可以降低远离描述子中心梯度的权重，因为这些边缘区域易受离散化误差影响。
+
+3. **子区域直方图构建：**将特征点邻域划分为$4\times4$个子区域，在每个区域中统计$\theta(x,y)$的加权直方图，权重即为第2步中高斯加权的梯度幅值，每个直方图在梯度方向上设置8个区间。划分子区域是为了提高描述子对梯度偏移的鲁棒性，因为梯度小幅度偏移后，仍贡献相同子区域的直方图。
+
+4. **三线性插值：**描述子的边界效应指，当采样点从一个子区域移动至另一个子区域，或从一个直方图区间移动至另一个直方图区间时，描述子会产生突变。为削弱边界效应，采用三线性插值将每个采样点的值分配至相邻的直方图区间中。具体而言，每个采样点参与$x$、$y$坐标（决定采样点所处的子区域）和梯度方向$\theta(x,y)$三个分量上相邻的直方图，加入直方图的元素额外以$(1-d)$加权，$d$为采样点到直方图子区域中心（对应$x$、$y$坐标）和区间中心（对应梯度方向$\theta(x,y)$）的距离。
+
+5. **描述子向量构造：**描述子由包含所有子区域直方图的各区间值的向量构成，由于特征邻域被分为$4\times4$个子区域，且每个子区域内直方图具有$8$个区间，故描述子向量具有$4*4*8=128$维。
+
+6. **光照不变性处理：**
+    1. 对比度和亮度不变性：将描述子向量归一化为单位长度，以抵消图像对比度和亮度变化对梯度的影响。（前者相当于每个像素乘以固定常数，后者相当于每个像素叠加固定常数。）
+
+    2. 非线性光照处理：非线性光照变化可能导致某些梯度幅值发生较大变化，但通常不影响梯度方向。通过截断描述子向量中大于阈值$T_{\mathrm{illum}}=0.2$的部分，再进行归一化，减弱非线性光照变化对梯度分布的影响。
+
+<figure id="fig-descriptor" markdown="span">
+    ![fig-descriptor](images/sift-descriptor.png){width="75%"}
+    <figcaption>SIFT描述子计算</figcaption>
+</figure>
 
 ## 2. OpenCV实现
 
