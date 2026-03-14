@@ -1,0 +1,1009 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A blog about SLAM and more.">
+      
+      
+        <meta name="author" content="qiqiqihy">
+      
+      
+        <link rel="canonical" href="https://qiqiqihy.github.io/Sheeep-Zone/SLAM-Basics-SIFT/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../SLAM-Basics-GFTT/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+    
+    
+      
+        <title>SIFT特征 - Sheeep's Zone</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Noto Sans SC";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#slam-basics-sift" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Sheeep&#39;s Zone" class="md-header__button md-logo" aria-label="Sheeep's Zone" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Sheeep's Zone
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              SIFT特征
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  
+  SLAM Basics
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Sheeep&#39;s Zone" class="md-nav__button md-logo" aria-label="Sheeep's Zone" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Sheeep's Zone
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SLAM Basics
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SLAM Basics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SIFT特征
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SIFT特征
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.概述
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 理论基础
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 理论基础">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 尺度空间
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 候选特征点检测
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 特征点细化
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.3 特征点细化">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        边缘效应消除
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 特征点的方向计算
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 描述子计算
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.5 描述子计算">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        特征匹配
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-opencv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. OpenCV实现
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SLAM-Basics-GFTT/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GFTT
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../SLAM-Basics-SURF/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SURF
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        0.概述
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. 理论基础
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1. 理论基础">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.1 尺度空间
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.2 候选特征点检测
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.3 特征点细化
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.3 特征点细化">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        边缘效应消除
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.4 特征点的方向计算
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1.5 描述子计算
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="1.5 描述子计算">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        特征匹配
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-opencv" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. OpenCV实现
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="slam-basics-sift"><span class="topic-label">SLAM Basics</span> | SIFT特征</h1>
+<h2 id="0">0.概述</h2>
+<p>SIFT特征<sup id="fnref:sift"><a class="footnote-ref" href="#fn:sift">1</a></sup>（Scale Invariant Feature Transform）是一种经典的局部特征描述算法，旨在从图像中提取对尺度缩放、旋转及光照变化具有较高鲁棒性的稳定特征点，常用于SLAM、三维重建等领域。SIFT特征核心流程包括四个阶段：</p>
+<ol>
+<li>
+<p><strong>尺度空间极值检测：</strong>利用DoG函数构建尺度空间，并在多尺度下搜索候选特征点。</p>
+</li>
+<li>
+<p><strong>特征点细化：</strong>通过二阶Taylor展开细化特征点的位置与尺度，并剔除低对比度点及边缘点。</p>
+</li>
+<li>
+<p><strong>方向计算：</strong>基于邻域梯度直方图为特征点计算方向，赋予特征点旋转不变性。</p>
+</li>
+<li>
+<p><strong>描述子计算：</strong>基于特征点邻域信息构建128维描述子，作为后续特征匹配的依据。</p>
+</li>
+</ol>
+<h2 id="1">1. 理论基础</h2>
+<h3 id="11">1.1 尺度空间</h3>
+<p>图像<span class="arithmatex">\(I(x,y)\)</span>的尺度空间定义为函数<span class="arithmatex">\(L(x,y,\sigma)\)</span>，满足：</p>
+<div class="arithmatex">\[
+L(x,y,\sigma)=G(x,y,\sigma)*I(x,y)
+\]</div>
+<p>其中<span class="arithmatex">\(*\)</span>为卷积运算，<span class="arithmatex">\(G(x,y,\sigma)\)</span>为Gaussian核，满足：</p>
+<div class="arithmatex">\[
+G(x,y,\sigma)=\frac{1}{2\pi\sigma^2}\exp\left(-\frac{x^2+y^2}{2\sigma^2}\right)
+\]</div>
+<h3 id="12">1.2 候选特征点检测</h3>
+<p>尺度空间中的候选特征点定义为DoG函数（Difference of Gaussian）的局部极值，DoG函数<span class="arithmatex">\(D(x,y,\sigma)\)</span>由尺度空间中相差常数因子<span class="arithmatex">\(k\)</span>的两层计算，即：</p>
+<div class="arithmatex">\[
+\begin{aligned}
+D(x,y,\sigma)&amp;=(G(x,y,k\sigma)-G(x,y,\sigma))*I(x,y)\\[5pt]
+             &amp;=L(x,y,k\sigma)-L(x,y,\sigma)
+\end{aligned}
+\]</div>
+<p>采用DoG函数的原因有二：一是DoG函数可以简单地由尺度空间<span class="arithmatex">\(L(x,y,\sigma)\)</span>计算，而<span class="arithmatex">\(L(x,y,\sigma)\)</span>的获取是描述尺度空间必须进行的计算；二是DoG函数为尺度归一化LoG（Laplacian of Gaussian）函数<span class="arithmatex">\(\sigma^2\nabla^2G\)</span>的近似，后者的局部极值被验证相较于梯度、Hessian和Harris响应函数可以产生最稳定的图像特征。</p>
+<details class="note">
+<summary>DoG函数近似尺度归一化LoG函数推导</summary>
+<p>Gaussian核<span class="arithmatex">\(G(x,y,\sigma)\)</span>为热扩散方程的解，即有：</p>
+<div class="arithmatex">\[
+\frac{\partial G}{\partial\sigma}=\sigma\nabla^2G\triangleq\sigma\left(\frac{\partial^2G}{\partial x^2}+\frac{\partial^2G}{\partial y^2}\right)
+\]</div>
+<p>因此有：</p>
+<div class="arithmatex">\[
+\sigma\nabla^2G=\frac{\partial G}{\partial\sigma}\approx\frac{G(x,y,k\sigma)-G(x,y,\sigma)}{k\sigma-\sigma}
+\]</div>
+<div class="arithmatex">\[
+\Rightarrow G(x,y,k\sigma)-G(x,y,\sigma)\approx(k-1)\sigma^2\nabla^2G
+\]</div>
+<div class="arithmatex">\[
+\Rightarrow D(x,y,\sigma)\approx\sigma^2\nabla^2G*I(x,y)
+\]</div>
+<p>由于<span class="arithmatex">\(k-1\)</span>为常数，其不影响局部极值位置，当<span class="arithmatex">\(k\to1\)</span>时，近似误差<span class="arithmatex">\(\to0\)</span>。</p>
+</details>
+<p>DoG函数的构造如<a class="fig-ref" href="#fig-dog">图</a>所示，具体步骤如下：</p>
+<ol>
+<li>
+<p><strong>尺度空间划分：</strong>将每个倍频程（Octave，即尺度<span class="arithmatex">\(\sigma\)</span>翻倍的过程）划分为<span class="arithmatex">\(s\)</span>个等比间隔，确定相邻尺度的比例因子<span class="arithmatex">\(k=2^{\frac{1}{s}}\)</span>。</p>
+</li>
+<li>
+<p><strong>增量式Gaussian卷积：</strong>在每个倍频程中，对初始图像进行增量式Gaussian卷积，生成<span class="arithmatex">\(s+3\)</span>张图像，即<span class="arithmatex">\(s+3\)</span>层（Layer）。</p>
+</li>
+<li>
+<p><strong>计算DoG：</strong>将相邻层图像作差，得到<span class="arithmatex">\(s+2\)</span>张DoG图像，用于后续的局部极值检测。</p>
+</li>
+<li>
+<p><strong>倍频程迭代：</strong>一个倍频程处理完后，选取其中尺度<span class="arithmatex">\(\sigma\)</span>为初始值<span class="arithmatex">\(2\)</span>倍的高斯图像（第<span class="arithmatex">\(s\)</span>层），进行隔行隔列采样，作为下一个倍频程的初始图像。第<span class="arithmatex">\(0\)</span>个倍频程的初始图像即为原始图像。</p>
+</li>
+</ol>
+<figure id="fig-dog">
+    <img alt="fig-dog" src="../images/sift-dog.png" width="75%" />
+    <figcaption>DoG函数构造</figcaption>
+</figure>
+<p>DoG函数构造完成后，按照<a class="fig-ref" href="#fig-extrema">图</a>中的方式筛选局部极值点作为候选特征点，即候选特征点的响应值（DoG函数在该像素处的值）大于或小于上下两层和本层中相邻的26个点的响应值。</p>
+<figure id="fig-extrema">
+    <img alt="fig-extrema" src="../images/sift-extrema.png" width="75%" />
+    <figcaption>DoG局部极值</figcaption>
+</figure>
+<p>为了提取更多候选特征点，可对原始图像上采样作为第<span class="arithmatex">\(0\)</span>个倍频程的初始图像，即用线性插值将原始图像的长宽各扩大<span class="arithmatex">\(2\)</span>倍。假设原始图像的尺度为<span class="arithmatex">\(\sigma=0.5\)</span>（防止混叠的最小值），则上采样图像的等效尺度为<span class="arithmatex">\(\sigma=1.0\)</span>，无需额外平滑即可直接用于构造DoG函数。</p>
+<h3 id="13">1.3 特征点细化</h3>
+<p>对候选特征点进一步细化，可提高特征点稳定性且更易于匹配，为此，考虑DoG函数的二阶Taylor展开，即：</p>
+<div class="arithmatex">\[
+D(x,y,\sigma)=D(\mathbf{x})\approx D(\mathbf{x}_0)+\frac{\partial D^\top}{\partial\mathbf{x}}(\mathbf{x}-\mathbf{x}_0)+\frac{1}{2}(\mathbf{x}-\mathbf{x}_0)^\top\frac{\partial^2D}{\partial\mathbf{x}^2}(\mathbf{x}-\mathbf{x}_0)
+\]</div>
+<p>其中<span class="arithmatex">\(\mathbf{x}\triangleq(x,y,\sigma)^\top\)</span>，<span class="arithmatex">\(\mathbf{x}_0\)</span>为上一步得到的候选特征点位置。定义<span class="arithmatex">\(\delta\mathbf{x}=\mathbf{x}-\mathbf{x}_0\)</span>，令DoG函数二阶Taylor展开式关于<span class="arithmatex">\(\delta\mathbf{x}\)</span>的导数为<span class="arithmatex">\(0\)</span>，解得最优增量<span class="arithmatex">\(\delta\mathbf{x}^*\)</span>：</p>
+<div class="arithmatex">\[
+\delta\mathbf{x}^*=-\frac{\partial^2 D}{\partial\mathbf{x}^2}^{-1}\frac{\partial D}{\partial \mathbf{x}}
+\]</div>
+<p>实现时，<span class="arithmatex">\(\frac{\partial D}{\partial\mathbf{x}}\)</span>和<span class="arithmatex">\(\frac{\partial^2 D}{\partial\mathbf{x}^2}\)</span>由候选点位置<span class="arithmatex">\(\mathbf{x}_0\)</span>与相邻像素的差分近似获取。若解得<span class="arithmatex">\(\delta\mathbf{x}\)</span>在任意方向上大于<span class="arithmatex">\(0.5\)</span>说明相比候选特征点位置<span class="arithmatex">\(\mathbf{x}_0\)</span>，DoG函数的局部极大值更接近与<span class="arithmatex">\(\mathbf{x}_0\)</span>相邻的某个像素，此时更新候选特征点位置，再次求解<span class="arithmatex">\(\delta\mathbf{x}\)</span>。最终细化后的特征点位置<span class="arithmatex">\(\hat{\mathbf{x}}\)</span>及响应值<span class="arithmatex">\(D(\hat{\mathbf{x}})\)</span>分别为：</p>
+<div class="arithmatex">\[
+\hat{\mathbf{x}}=\mathbf{x}_0+\delta\mathbf{x}
+,\quad D(\hat{\mathbf{x}})=D+\frac{1}{2}\frac{\partial D^\top}{\partial\mathbf{x}}\hat{\mathbf{x}}
+\]</div>
+<p>响应值<span class="arithmatex">\(D(\hat{\mathbf{x}})\)</span>低于阈值<span class="arithmatex">\(T_\mathrm{res}\)</span>的特征点被丢弃。</p>
+<h4 id="_1">边缘效应消除</h4>
+<p>DoG函数会在跨越边缘时产生强烈的响应，SIFT作为一种斑点（Blob）特征，为提高稳定性，需要剔除边缘上的特征点。</p>
+<p>边缘上点的DoG函数会在跨越边缘方向产生较大的主曲率，同时在沿边缘方向产生较小的主曲率，利用这一特点可有效剔除边缘上的特征点。主曲率可由特征点处的Hessian矩阵<span class="arithmatex">\(\mathbf{H}\)</span>计算：</p>
+<div class="arithmatex">\[
+\mathbf{H}=\begin{bmatrix}D_{xx}&amp;D_{xy}\\D_{xy}&amp;D_{yy}\end{bmatrix}
+\]</div>
+<p>Hessian矩阵<span class="arithmatex">\(\mathbf{H}\)</span>由特征点及其相邻像素差分近似。<span class="arithmatex">\(\mathbf{H}\)</span>的特征值正比于主曲率，记<span class="arithmatex">\(\alpha\)</span>和<span class="arithmatex">\(\beta\)</span>分别为较大和较小的特征值，则有：</p>
+<div class="arithmatex">\[
+\begin{gathered}
+\mathrm{trace}(\mathbf{H})=D_{xx}+D_{yy}=\alpha+\beta,\\
+\det(\mathbf{H})=D_{xx}D_{yy}-D_{xy}^2=\alpha\beta
+\end{gathered}
+\]</div>
+<p>若行列式<span class="arithmatex">\(\det(\mathbf{H})\)</span>为负，则特征点并非DoG函数的极值点，直接剔除。因此只需考虑行列式<span class="arithmatex">\(\det(\mathbf{H})\)</span>为正的情况，此时<span class="arithmatex">\(\alpha\)</span>与<span class="arithmatex">\(\beta\)</span>具有相同的符号，记<span class="arithmatex">\(\alpha=r\beta\)</span>，有：</p>
+<div class="arithmatex">\[
+\frac{\mathrm{trace}(\mathbf{H})^2}{\det(\mathbf{H})}=\frac{(\alpha+\beta)^2}{\alpha\beta}=\frac{(r\beta+\beta)^2}{r\beta^2}=\frac{(r+1)^2}{r}
+\]</div>
+<p>当特征值<span class="arithmatex">\(\alpha=\beta\)</span>时，<span class="arithmatex">\(\frac{(r+1)^2}{r}\)</span>取到最小值，定义阈值<span class="arithmatex">\(T_\mathrm{edge}\)</span>，并剔除所有满足：</p>
+<div class="arithmatex">\[
+\frac{\mathrm{trace}(\mathbf{H})}{\det(\mathbf{H})}\ge\frac{(T_{\mathrm{edge}}+1)^2}{T_{\mathrm{edge}}}
+\]</div>
+<p>的边缘特征点。</p>
+<h3 id="14">1.4 特征点的方向计算</h3>
+<p>为实现特征点的旋转不变形，根据特征点附近局部图像信息计算特征点的方向，进而在描述子计算时根据特征点的方向进行旋转校正。</p>
+<p>对每个特征点，选择尺度空间中与特征点尺度最接近的层计算方向，记该层图像为<span class="arithmatex">\(L(x,y)\)</span>，定义梯度幅值<span class="arithmatex">\(m(x,y)\)</span>和方向<span class="arithmatex">\(\theta(x,y)\)</span>：</p>
+<div class="arithmatex">\[
+\begin{gathered}
+m(x,y)=\sqrt{[L(x+1,y)-L(x-1,y)]^2+[L(x,y+1)-L(x,y-1)]^2}\\
+\theta(x,y)=\tan^{-1}\frac{L(x,y+1)-L(x,y-1)}{L(x+1,y)-L(x-1,y)}
+\end{gathered}
+\]</div>
+<p>计算特征点邻域内每个点的梯度幅值<span class="arithmatex">\(m(x,y)\)</span>和方向<span class="arithmatex">\(\theta(x,y)\)</span>，并在均分<span class="arithmatex">\(360^\circ\)</span>的<span class="arithmatex">\(36\)</span>个区间内统计<span class="arithmatex">\(\theta(x,y)\)</span>的加权直方图，每个加入直方图的样本由梯度幅值<span class="arithmatex">\(m(x,y)\)</span>和<span class="arithmatex">\(1.5\)</span>倍关键点尺度的高斯核加权。</p>
+<p>直方图的最高峰及任何高于最高峰<span class="arithmatex">\(80\%\)</span>的峰对应特征点的方向，换言之，同一尺度、同一位置的特征点可能具有多个方向。为提高精度，每个对应方向的峰与相邻两个区间的值进行抛物线拟合，作为最终的方向。</p>
+<h3 id="15">1.5 描述子计算</h3>
+<p>描述子的计算由<a class="fig-ref" href="#fig-descriptor">图</a>所示，具体步骤如下：</p>
+<figure id="fig-descriptor">
+    <img alt="fig-descriptor" src="../images/sift-descriptor.png" width="75%" />
+    <figcaption>SIFT描述子计算</figcaption>
+</figure>
+<ol>
+<li>
+<p><strong>邻域梯度计算：</strong>与计算方向相似，选择尺度空间中与特征点尺度最接近的层，在该层上计算特征点邻域内的梯度幅值<span class="arithmatex">\(m(x,y)\)</span>和方向<span class="arithmatex">\(\theta(x,y)\)</span>，并基于特征点方向进行旋转校正，以实现旋转不变性。每一层的梯度可以预先计算以提高效率。</p>
+</li>
+<li>
+<p><strong>高斯加权：</strong>使用<span class="arithmatex">\(\sigma\)</span>为窗口宽度一半的高斯核加权邻域内每个点的梯度幅值<span class="arithmatex">\(m(x,y)\)</span>，此操作一方面可以避免窗口位置微小变化导致的描述子突变；另一方面可以降低远离描述子中心梯度的权重，因为这些边缘区域易受离散化误差影响。</p>
+</li>
+<li>
+<p><strong>子区域直方图构建：</strong>将特征点邻域划分为<span class="arithmatex">\(4\times4\)</span>个子区域，在每个区域中统计<span class="arithmatex">\(\theta(x,y)\)</span>的加权直方图，权重即为第2步中高斯加权的梯度幅值，每个直方图在梯度方向上设置8个区间。划分子区域是为了提高描述子对梯度偏移的鲁棒性，因为梯度小幅度偏移后，仍贡献相同子区域的直方图。</p>
+</li>
+<li>
+<p><strong>三线性插值：</strong>描述子的边界效应指，当采样点从一个子区域移动至另一个子区域，或从一个直方图区间移动至另一个直方图区间时，描述子会产生突变。为削弱边界效应，采用三线性插值将每个采样点的值分配至相邻的直方图区间中。具体而言，每个采样点参与<span class="arithmatex">\(x\)</span>、<span class="arithmatex">\(y\)</span>坐标（决定采样点所处的子区域）和梯度方向<span class="arithmatex">\(\theta(x,y)\)</span>三个分量上相邻的直方图，加入直方图的元素额外以<span class="arithmatex">\((1-d)\)</span>加权，<span class="arithmatex">\(d\)</span>为采样点到直方图子区域中心（对应<span class="arithmatex">\(x\)</span>、<span class="arithmatex">\(y\)</span>坐标）和区间中心（对应梯度方向<span class="arithmatex">\(\theta(x,y)\)</span>）的距离。</p>
+</li>
+<li>
+<p><strong>描述子向量构造：</strong>描述子由包含所有子区域直方图各区间值的向量构成，由于特征邻域被分为<span class="arithmatex">\(4\times4\)</span>个子区域，且每个子区域直方图具有<span class="arithmatex">\(8\)</span>个区间，故描述子向量具有<span class="arithmatex">\(4*4*8=128\)</span>维。</p>
+</li>
+<li>
+<p><strong>光照不变性处理：</strong></p>
+<ol>
+<li>
+<p>对比度和亮度不变性：将描述子向量归一化为单位长度，以抵消图像对比度和亮度变化对梯度的影响。（前者相当于每个像素乘以固定常数，后者相当于每个像素叠加固定常数。）</p>
+</li>
+<li>
+<p>非线性光照处理：非线性光照变化可能导致某些梯度幅值发生较大变化，但通常不影响梯度方向。通过截断描述子向量中大于阈值<span class="arithmatex">\(T_{\mathrm{illum}}=0.2\)</span>的部分，再进行归一化，减弱非线性光照变化对梯度分布的影响。</p>
+</li>
+</ol>
+</li>
+</ol>
+<h4 id="_2">特征匹配</h4>
+<p>特征点间的相似程度由对应描述子的欧氏距离度量，通过最近邻搜索、比例阈值测试等方法，可完成特征匹配。</p>
+<h2 id="2-opencv">2. OpenCV实现</h2>
+<p>OpenCV 在 <code>features2d</code> 模块中提供了 SIFT 的检测与描述接口，可以直接用于关键点提取和匹配<sup id="fnref:opencv_sift"><a class="footnote-ref" href="#fn:opencv_sift">2</a></sup>。</p>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:sift">
+<p>D. G. Lowe, “Distinctive image features from scale-invariant keypoints,” International journal of computer vision, vol. 60, no. 2, pp. 91–110, 2004.&#160;<a class="footnote-backref" href="#fnref:sift" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+<li id="fn:opencv_sift">
+<p>OpenCV Documentation. SIFT (Scale-Invariant Feature Transform). https://docs.opencv.org/&#160;<a class="footnote-backref" href="#fnref:opencv_sift" title="Jump back to footnote 2 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../javascripts/figure-ref.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
