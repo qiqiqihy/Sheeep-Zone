@@ -191,8 +191,73 @@ m(x,y)=\sqrt{[L(x+1,y)-L(x-1,y)]^2+[L(x,y+1)-L(x,y-1)]^2}\\
 
 ## 2. OpenCV实现
 
-OpenCV 在 `features2d` 模块中提供了 SIFT 的检测与描述接口，可以直接用于关键点提取和匹配[^opencv_sift]。
+- OpenCV版本：4.5.5
+
+### 2.1 接口
+
+OpenCV在`features2d`模块中提供了SIFT特征点检测与描述子计算[^opencv_sift]，接口如下：
+
+```cpp linenums="1" title="SIFT 主要接口"
+// 创建 SIFT 检测器
+cv::Ptr<cv::SIFT> sift = cv::SIFT::create(
+    int nfeatures          = 0,     // 最多保留的特征点数，0 表示不限
+    int nOctaveLayers      = 3,     // 每倍频程的层数 s（DoG 层数 = s+2）
+    double contrastThreshold = 0.04,// 低对比度响应阈值 T_res
+    double edgeThreshold   = 10,    // 边缘消除阈值 T_edge
+    double sigma           = 1.6    // 初始高斯核 σ
+);
+
+// 检测特征点并计算描述子
+void cv::SIFT::detectAndCompute(
+    InputArray image,                       // 输入灰度图
+    InputArray mask,                        // 掩码，不使用时传 cv::noArray()
+    std::vector<cv::KeyPoint>& keypoints,   // 输出：特征点列表
+    OutputArray descriptors,                // 输出：描述子矩阵（N×128, CV_32F）
+    bool useProvidedKeypoints = false       // 是否使用预设特征点
+);
+```
+
+### 2.2 代码分析
+
+下面给出一个完整的 SIFT 特征提取与可视化示例：
+
+```cpp linenums="1" title="sift_example.cpp"
+#include <iostream>
+#include <opencv2/opencv.hpp>
+#include <opencv2/features2d.hpp>
+
+int main() {
+    // 读取图像并转换为灰度图
+    cv::Mat img = cv::imread("image.png");
+    if (img.empty()) {
+        std::cerr << "无法读取图像" << std::endl;
+        return -1;
+    }
+    cv::Mat gray;
+    cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
+
+    // 创建 SIFT 检测器（使用默认参数）
+    cv::Ptr<cv::SIFT> sift = cv::SIFT::create();
+
+    // 检测特征点并计算 128 维描述子
+    std::vector<cv::KeyPoint> keypoints;
+    cv::Mat descriptors;
+    sift->detectAndCompute(gray, cv::noArray(), keypoints, descriptors);
+
+    std::cout << "检测到特征点数量：" << keypoints.size() << std::endl;
+    std::cout << "描述子维度："       << descriptors.cols  << std::endl;
+
+    // 绘制特征点（含方向与尺度）并保存结果
+    cv::Mat img_kp;
+    cv::drawKeypoints(img, keypoints, img_kp,
+                      cv::Scalar::all(-1),
+                      cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    cv::imwrite("sift_keypoints.png", img_kp);
+
+    return 0;
+}
+```
 
 [^sift]: D. G. Lowe, “Distinctive image features from scale-invariant keypoints,” International journal of computer vision, vol. 60, no. 2, pp. 91–110, 2004.
 
-[^opencv_sift]: OpenCV Documentation. SIFT (Scale-Invariant Feature Transform). https://docs.opencv.org/
+[^opencv_sift]: [OpenCV 4.5.5 SIFT Class Reference](https://docs.opencv.org/4.5.5/d7/d60/classcv_1_1SIFT.html)
