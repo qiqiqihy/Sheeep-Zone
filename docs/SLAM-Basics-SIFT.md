@@ -4,12 +4,9 @@
 
 SIFT特征[^sift]（Scale Invariant Feature Transform）是一种经典的局部特征描述算法，旨在从图像中提取对尺度缩放、旋转及光照变化具有较高鲁棒性的稳定特征点，常用于SLAM、三维重建等领域。SIFT特征核心流程包括四个阶段：
 
-1. **尺度空间极值检测：**利用DoG函数构建尺度空间，并在多尺度下搜索候选特征点。
-
-2. **特征点细化：**通过二阶Taylor展开细化特征点的位置与尺度，并剔除低对比度点及边缘点。
-
-3. **方向计算：**基于邻域梯度直方图为特征点计算方向，赋予特征点旋转不变性。
-
+1. **尺度空间极值检测：**利用DoG函数构建尺度空间，并在多尺度下搜索候选特征点。  
+2. **特征点细化：**通过二阶Taylor展开细化特征点的位置与尺度，并剔除低对比度点及边缘点。  
+3. **方向计算：**基于邻域梯度直方图为特征点计算方向，赋予特征点旋转不变性。  
 4. **描述子计算：**基于特征点邻域信息构建128维描述子，作为后续特征匹配的依据。
 
 ## 1. 理论基础
@@ -22,7 +19,7 @@ SIFT特征[^sift]（Scale Invariant Feature Transform）是一种经典的局部
 L(x,y,\sigma)=G(x,y,\sigma)*I(x,y)
 \]
 
-其中$*$为卷积运算，$G(x,y,\sigma)$为Gaussian核，满足：
+其中$*$为卷积运算，$G(x,y,\sigma)$为高斯核，满足：
 
 \[
 G(x,y,\sigma)=\frac{1}{2\pi\sigma^2}\exp\left(-\frac{x^2+y^2}{2\sigma^2}\right)
@@ -42,7 +39,7 @@ D(x,y,\sigma)&=(G(x,y,k\sigma)-G(x,y,\sigma))*I(x,y)\\[5pt]
 采用DoG函数的原因有二：一是DoG函数可以简单地由尺度空间$L(x,y,\sigma)$计算，而$L(x,y,\sigma)$的获取是描述尺度空间必须进行的计算；二是DoG函数为尺度归一化LoG（Laplacian of Gaussian）函数$\sigma^2\nabla^2G$的近似，后者的局部极值被验证相较于梯度、Hessian和Harris响应函数可以产生最稳定的图像特征。
 
 ??? note "DoG函数近似尺度归一化LoG函数推导"
-    Gaussian核$G(x,y,\sigma)$为热扩散方程的解，即有：
+    高斯核$G(x,y,\sigma)$为热扩散方程的解，即有：
 
     \[
     \frac{\partial G}{\partial\sigma}=\sigma\nabla^2G\triangleq\sigma\left(\frac{\partial^2G}{\partial x^2}+\frac{\partial^2G}{\partial y^2}\right)
@@ -66,12 +63,9 @@ D(x,y,\sigma)&=(G(x,y,k\sigma)-G(x,y,\sigma))*I(x,y)\\[5pt]
 
 DoG函数的构造如[图](#fig-dog){.fig-ref}所示，具体步骤如下：
 
-1. **尺度空间划分：**将每个倍频程（Octave，即尺度$\sigma$翻倍的过程）划分为$s$个等比间隔，确定相邻尺度的比例因子$k=2^{\frac{1}{s}}$。
-
-2. **增量式Gaussian卷积：**在每个倍频程中，对初始图像进行增量式Gaussian卷积，生成$s+3$张图像，即$s+3$层（Layer）。
-
-3. **计算DoG：**将相邻层图像作差，得到$s+2$张DoG图像，用于后续的局部极值检测。
-
+1. **尺度空间划分：**将每个倍频程（Octave，即尺度$\sigma$翻倍的过程）划分为$s$个等比间隔，确定相邻尺度的比例因子$k=2^{\frac{1}{s}}$。  
+2. **增量式高斯卷积：**在每个倍频程中，对初始图像进行增量式高斯卷积，生成$s+3$张图像，即$s+3$层（Layer）。  
+3. **计算DoG：**将相邻层图像作差，得到$s+2$张DoG图像，用于后续的局部极值检测。  
 4. **倍频程迭代：**一个倍频程处理完后，选取其中尺度$\sigma$为初始值$2$倍的高斯图像（第$s$层），进行隔行隔列采样，作为下一个倍频程的初始图像。第$0$个倍频程的初始图像即为原始图像。
 
 <figure id="fig-dog" markdown="span">
@@ -113,9 +107,7 @@ D(x,y,\sigma)=D(\mathbf{x})\approx D(\mathbf{x}_0)+\frac{\partial D^\top}{\parti
 
 #### 边缘效应消除
 
-DoG函数会在跨越边缘时产生强烈的响应，SIFT作为一种斑点（Blob）特征，为提高稳定性，需要剔除边缘上的特征点。
-
-边缘上点的DoG函数会在跨越边缘方向产生较大的主曲率，同时在沿边缘方向产生较小的主曲率，利用这一特点可有效剔除边缘上的特征点。主曲率可由特征点处的Hessian矩阵$\mathbf{H}$计算：
+DoG函数会在跨越边缘时产生强烈的响应，SIFT作为一种斑点（Blob）特征，为提高稳定性，需要剔除边缘上的特征点。边缘上点的DoG函数会在跨越边缘方向产生较大的主曲率，同时在沿边缘方向产生较小的主曲率，利用这一特点可有效剔除边缘上的特征点。主曲率可由特征点处的Hessian矩阵$\mathbf{H}$计算：
 
 \[
 \mathbf{H}=\begin{bmatrix}D_{xx}&D_{xy}\\D_{xy}&D_{yy}\end{bmatrix}
@@ -136,7 +128,7 @@ Hessian矩阵$\mathbf{H}$由特征点及其相邻像素差分近似。$\mathbf{H
 \frac{\mathrm{trace}(\mathbf{H})^2}{\det(\mathbf{H})}=\frac{(\alpha+\beta)^2}{\alpha\beta}=\frac{(r\beta+\beta)^2}{r\beta^2}=\frac{(r+1)^2}{r}
 \]
 
-当特征值$\alpha=\beta$时，$\frac{(r+1)^2}{r}$取到最小值，定义阈值$T_\mathrm{edge}$，并剔除所有满足：
+当特征值$\alpha=\beta$时，$\frac{(r+1)^2}{r}$取到最小值，定义阈值$T_\mathrm{edge}$，并剔除所有满足
 
 \[
 \frac{\mathrm{trace}(\mathbf{H})}{\det(\mathbf{H})}\ge\frac{(T_{\mathrm{edge}}+1)^2}{T_{\mathrm{edge}}}
@@ -146,9 +138,7 @@ Hessian矩阵$\mathbf{H}$由特征点及其相邻像素差分近似。$\mathbf{H
 
 ### 1.4 特征点的方向计算
 
-为实现特征点的旋转不变形，根据特征点附近局部图像信息计算特征点的方向，进而在描述子计算时根据特征点的方向进行旋转校正。
-
-对每个特征点，选择尺度空间中与特征点尺度最接近的层计算方向，记该层图像为$L(x,y)$，定义梯度幅值$m(x,y)$和方向$\theta(x,y)$：
+为实现特征点的旋转不变形，根据特征点附近局部图像信息计算特征点的方向，进而在描述子计算时根据特征点的方向进行旋转校正。对每个特征点，选择尺度空间中与特征点尺度最接近的层计算方向，记该层图像为$L(x,y)$，定义梯度幅值$m(x,y)$和方向$\theta(x,y)$：
 
 \[
 \begin{gathered}
@@ -159,7 +149,7 @@ m(x,y)=\sqrt{[L(x+1,y)-L(x-1,y)]^2+[L(x,y+1)-L(x,y-1)]^2}\\
 
 计算特征点邻域内每个点的梯度幅值$m(x,y)$和方向$\theta(x,y)$，并在均分$360^\circ$的$36$个区间内统计$\theta(x,y)$的加权直方图，每个加入直方图的样本由梯度幅值$m(x,y)$和$1.5$倍关键点尺度的高斯核加权。
 
-直方图的最高峰及任何高于最高峰$80\%$的峰对应特征点的方向，换言之，同一尺度、同一位置的特征点可能具有多个方向。为提高精度，每个对应方向的峰与相邻两个区间的值进行抛物线拟合，作为最终的方向。
+直方图的最高峰及任何高于最高峰$80\%$的峰对应特征点的方向，换言之，同一尺度、同一位置的特征点可能具有多个方向。为提高精度，将每个对应方向的峰与相邻两个区间的值进行抛物线拟合，作为最终的方向。
 
 ### 1.5 描述子计算
 
@@ -170,19 +160,13 @@ m(x,y)=\sqrt{[L(x+1,y)-L(x-1,y)]^2+[L(x,y+1)-L(x,y-1)]^2}\\
     <figcaption>SIFT描述子计算</figcaption>
 </figure>
 
-1. **邻域梯度计算：**与计算方向相似，选择尺度空间中与特征点尺度最接近的层，在该层上计算特征点邻域内的梯度幅值$m(x,y)$和方向$\theta(x,y)$，并基于特征点方向进行旋转校正，以实现旋转不变性。每一层的梯度可以预先计算以提高效率。
-
-2. **高斯加权：**使用$\sigma$为窗口宽度一半的高斯核加权邻域内每个点的梯度幅值$m(x,y)$，此操作一方面可以避免窗口位置微小变化导致的描述子突变；另一方面可以降低远离描述子中心梯度的权重，因为这些边缘区域易受离散化误差影响。
-
-3. **子区域直方图构建：**将特征点邻域划分为$4\times4$个子区域，在每个区域中统计$\theta(x,y)$的加权直方图，权重即为第2步中高斯加权的梯度幅值，每个直方图在梯度方向上设置8个区间。划分子区域是为了提高描述子对梯度偏移的鲁棒性，因为梯度小幅度偏移后，仍贡献相同子区域的直方图。
-
-4. **三线性插值：**描述子的边界效应指，当采样点从一个子区域移动至另一个子区域，或从一个直方图区间移动至另一个直方图区间时，描述子会产生突变。为削弱边界效应，采用三线性插值将每个采样点的值分配至相邻的直方图区间中。具体而言，每个采样点参与$x$、$y$坐标（决定采样点所处的子区域）和梯度方向$\theta(x,y)$三个分量上相邻的直方图，加入直方图的元素额外以$(1-d)$加权，$d$为采样点到直方图子区域中心（对应$x$、$y$坐标）和区间中心（对应梯度方向$\theta(x,y)$）的距离。
-
-5. **描述子向量构造：**描述子由包含所有子区域直方图各区间值的向量构成，由于特征邻域被分为$4\times4$个子区域，且每个子区域直方图具有$8$个区间，故描述子向量具有$4*4*8=128$维。
-
-6. **光照不变性处理：**
-    1. 对比度和亮度不变性：将描述子向量归一化为单位长度，以抵消图像对比度和亮度变化对梯度的影响。（前者相当于每个像素乘以固定常数，后者相当于每个像素叠加固定常数。）
-
+1. **邻域梯度计算：**与计算方向相似，选择尺度空间中与特征点尺度最接近的层，在该层上计算特征点邻域内的梯度幅值$m(x,y)$和方向$\theta(x,y)$，并基于特征点方向进行旋转校正，以实现旋转不变性。每一层的梯度可以预先计算以提高效率。  
+2. **高斯加权：**使用$\sigma$为窗口宽度一半的高斯核加权邻域内每个点的梯度幅值$m(x,y)$，此操作一方面可以避免窗口位置微小变化导致的描述子突变；另一方面可以降低远离描述子中心梯度的权重，因为这些边缘区域易受离散化误差影响。  
+3. **子区域直方图构建：**将特征点邻域划分为$4\times4$个子区域，在每个区域中统计$\theta(x,y)$的加权直方图，权重即为第2步中高斯加权的梯度幅值，每个直方图在梯度方向上设置8个区间。划分子区域是为了提高描述子对梯度偏移的鲁棒性，因为梯度小幅度偏移后，仍贡献相同子区域的直方图。  
+4. **三线性插值：**描述子的边界效应指，当采样点从一个子区域移动至另一个子区域，或从一个直方图区间移动至另一个直方图区间时，描述子会产生突变。为削弱边界效应，采用三线性插值将每个采样点的值分配至相邻的直方图区间中。具体而言，每个采样点参与$x$、$y$坐标（决定采样点所处的子区域）和梯度方向$\theta(x,y)$三个分量上相邻的直方图，加入直方图的元素额外以$(1-d)$加权，$d$为采样点到直方图子区域中心（对应$x$、$y$坐标）和区间中心（对应梯度方向$\theta(x,y)$）的距离。  
+5. **描述子向量构造：**描述子由包含所有子区域直方图各区间值的向量构成，由于特征邻域被分为$4\times4$个子区域，且每个子区域直方图具有$8$个区间，故描述子向量具有$4*4*8=128$维。  
+6. **光照不变性处理：**  
+    1. 对比度和亮度不变性：将描述子向量归一化为单位长度，以抵消图像对比度和亮度变化对梯度的影响。（前者相当于每个像素乘以固定常数，后者相当于每个像素叠加固定常数。）  
     2. 非线性光照处理：非线性光照变化可能导致某些梯度幅值发生较大变化，但通常不影响梯度方向。通过截断描述子向量中大于阈值$T_{\mathrm{illum}}=0.2$的部分，再进行归一化，减弱非线性光照变化对梯度分布的影响。
 
 #### 特征匹配
@@ -197,64 +181,106 @@ m(x,y)=\sqrt{[L(x+1,y)-L(x-1,y)]^2+[L(x,y+1)-L(x,y-1)]^2}\\
 
 OpenCV在`features2d`模块中提供了SIFT特征点检测与描述子计算[^opencv_sift]，接口如下：
 
-```cpp linenums="1" title="SIFT 主要接口"
-// 创建 SIFT 检测器
-cv::Ptr<cv::SIFT> sift = cv::SIFT::create(
-    int nfeatures          = 0,     // 最多保留的特征点数，0 表示不限
-    int nOctaveLayers      = 3,     // 每倍频程的层数 s（DoG 层数 = s+2）
-    double contrastThreshold = 0.04,// 低对比度响应阈值 T_res
-    double edgeThreshold   = 10,    // 边缘消除阈值 T_edge
-    double sigma           = 1.6    // 初始高斯核 σ
+```cpp linenums="1" title="SIFT实例化接口"
+static Ptr<SIFT> cv::SIFT::create(
+    int nfeatures            = 0,
+    int nOctaveLayers        = 3,
+    double contrastThreshold = 0.04,
+    double edgeThreshold     = 10,
+    double sigma             = 1.6
 );
 
-// 检测特征点并计算描述子
-void cv::SIFT::detectAndCompute(
-    InputArray image,                       // 输入灰度图
-    InputArray mask,                        // 掩码，不使用时传 cv::noArray()
-    std::vector<cv::KeyPoint>& keypoints,   // 输出：特征点列表
-    OutputArray descriptors,                // 输出：描述子矩阵（N×128, CV_32F）
-    bool useProvidedKeypoints = false       // 是否使用预设特征点
+static Ptr<SIFT> cv::SIFT::create(
+    int nfeatures,
+    int nOctaveLayers,
+    double contrastThreshold,
+    double edgeThreshold,
+    double sigma,
+    int descriptorType
 );
 ```
 
+`nfeatures`：最多保留的特征点数，$0$表示不限，输出特征点按响应值排序。  
+`nOctaveLayers`：每倍频程的层数$s$，倍频程数由输入图像分辨率自动计算。  
+`contrastThreshold`：响应值阈值$T_\mathrm{res}$。  
+`edgeThreshold`：边缘效应阈值$T_\mathrm{edge}$。  
+`sigma`：第1倍频程初始高斯核$\sigma$。  
+`descriptorType`：描述子数据类型，支持`CV_32F`和`CV_8U`，默认为`CV_32F`。 
+
+---
+
+```cpp linenums="1" title="SIFT特征提取&描述子计算接口"
+virtual void cv::Feature2D::detectAndCompute(
+    InputArray image,
+    InputArray mask,
+    std::vector<KeyPoint>& keypoints,
+    OutputArray descriptors,
+    bool useProvidedKeypoints = false
+);
+```
+
+`image`：输入图像。  
+`mask`：掩码，若为空则传入`cv::noArray()`。  
+`keypoints`：输出特征点。  
+`descriptors`：输出描述子，格式为$n\times128$，元素类型为`CV_32F`。  
+`useProvidedKeypoints`：是否使用传入的特征点作为先验。
+
 ### 2.2 代码分析
 
-下面给出一个完整的 SIFT 特征提取与可视化示例：
+```cpp linenums="1" title="SIFT特征提取&描述子计算实现"
+// sift_dispatch.cpp
+// 为保障代码连贯性，移除了安全检查和性能统计代码
+void SIFT_Impl::detectAndCompute(
+    InputArray _image, 
+    InputArray _mask,
+    std::vector<KeyPoint>& keypoints, 
+    OutputArray _descriptors,
+    bool useProvidedKeypoints) {
+}
+```
 
-```cpp linenums="1" title="sift_example.cpp"
+### 2.3 完整使用示例
+
+```cpp linenums="1" title="Example"
 #include <iostream>
-#include <opencv2/opencv.hpp>
+#include <vector>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/imgcodecs.hpp>
 #include <opencv2/features2d.hpp>
+#include <opencv2/highgui.hpp>
 
-int main() {
-    // 读取图像并转换为灰度图
-    cv::Mat img = cv::imread("image.png");
-    if (img.empty()) {
-        std::cerr << "无法读取图像" << std::endl;
-        return -1;
-    }
-    cv::Mat gray;
-    cv::cvtColor(img, gray, cv::COLOR_BGR2GRAY);
+int main(int argc, char **argv) {
+    
+  if (argc < 2) {
+      std::cerr << "Usage: " << argv[0] << " <image_path>" << std::endl;
+      return -1;
+  }
+  cv::Mat img = cv::imread(std::string(argv[1]), cv::IMREAD_GRAYSCALE);
 
-    // 创建 SIFT 检测器（使用默认参数）
-    cv::Ptr<cv::SIFT> sift = cv::SIFT::create();
+  // 创建 SIFT Detector
+  int nfeatures = 500;
+  int nOctaveLayers = 3;
+  double constrastThreshold = 0.04;
+  double edgeThreshold = 10;
+  double sigma = 1.6;
+  auto sift = cv::SIFT::create(nfeatures, nOctaveLayers, constrastThreshold, edgeThreshold, sigma);
 
-    // 检测特征点并计算 128 维描述子
-    std::vector<cv::KeyPoint> keypoints;
-    cv::Mat descriptors;
-    sift->detectAndCompute(gray, cv::noArray(), keypoints, descriptors);
+  // 提取特征点，计算描述子
+  std::vector<cv::KeyPoint> keypoints;
+  cv::Mat descriptors;
+  bool useProvidedKeypoints = false;
+  sift->detectAndCompute(img, cv::noArray(), keypoints, descriptors, useProvidedKeypoints);
 
-    std::cout << "检测到特征点数量：" << keypoints.size() << std::endl;
-    std::cout << "描述子维度："       << descriptors.cols  << std::endl;
+  cv::Mat display;
+  cv::cvtColor(img, display, cv::COLOR_GRAY2BGR);
+  for (const auto &kp : keypoints) {
+    cv::circle(display, kp.pt, 2, cv::Scalar(0, 255, 0), -1);
+  }
+  cv::imshow("SIFT Keypoints", display);
+  cv::waitKey(0);
 
-    // 绘制特征点（含方向与尺度）并保存结果
-    cv::Mat img_kp;
-    cv::drawKeypoints(img, keypoints, img_kp,
-                      cv::Scalar::all(-1),
-                      cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-    cv::imwrite("sift_keypoints.png", img_kp);
-
-    return 0;
+  return 0;
 }
 ```
 
