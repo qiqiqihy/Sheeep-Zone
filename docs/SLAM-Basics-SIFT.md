@@ -237,9 +237,15 @@ void SIFT_Impl::detectAndCompute(
     OutputArray _descriptors,
     bool useProvidedKeypoints) {
 
-    int firstOctave = -1, actualNOctaves = 0, actualNLayers = 0;
+    // 参数初始化：
+    //   初始倍频程firstOctave，为负则对原图上采样
+    //   先验倍频程数actualNOctaves
+    int firstOctave = -1, actualNOctaves = 0;
+    
+    // 从InputArray获取cv::Mat
     Mat image = _image.getMat(), mask = _mask.getMat();
 
+    // 先验点处理
     if( useProvidedKeypoints )
     {
         firstOctave = 0;
@@ -248,10 +254,10 @@ void SIFT_Impl::detectAndCompute(
         {
             int octave, layer;
             float scale;
+            // 从先验点中解码octave, layer, scale信息
             unpackOctave(keypoints[i], octave, layer, scale);
             firstOctave = std::min(firstOctave, octave);
             maxOctave = std::max(maxOctave, octave);
-            actualNLayers = std::max(actualNLayers, layer-2);
         }
 
         firstOctave = std::min(firstOctave, 0);
@@ -259,15 +265,22 @@ void SIFT_Impl::detectAndCompute(
     }
 ```
 
-有先验点时（`useProvidedKeypoints == true`），根据先验点确定初始倍频程`firstOctave`，最大倍频程数`maxOctave`和每倍频程层数`acyualNLayers`。
+有先验点时（`useProvidedKeypoints == true`），根据先验点确定初始倍频程`firstOctave`和先验倍频程数`actualNOctave`，前者决定是否对原图上采样，后者决定本次特征提取的倍频程数。
 
-```cpp linenums="30"
+```cpp linenums="36"
+    // 原图下采样
     Mat base = createInitialImage(image, firstOctave < 0, (float)sigma);
+    
     std::vector<Mat> gpyr;
-    int nOctaves = actualNOctaves > 0 ? actualNOctaves : cvRound(std::log( (double)std::min( base.cols, base.rows ) ) / std::log(2.) - 2) - firstOctave;
+    int nOctaves = actualNOctaves > 0 ? 
+        actualNOctaves : 
+        cvRound(std::log((double)std::min(base.cols, base.rows)) / 
+                std::log(2.) - 2) - firstOctave;
 
     buildGaussianPyramid(base, gpyr, nOctaves);
+```
 
+```cpp linenums="43"
     std::vector<Mat> dogpyr;
     buildDoGPyramid(gpyr, dogpyr);
     findScaleSpaceExtrema(gpyr, dogpyr, keypoints);
