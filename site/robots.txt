@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://qiqiqihy.github.io/Sheeep-Zone/sitemap.xml

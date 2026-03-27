@@ -227,6 +227,28 @@ virtual void cv::Feature2D::detectAndCompute(
 
 ### 2.2 代码分析
 
+下面示例使用Material代码注解，将关键代码位置与解释绑定，阅读体验类似“代码行旁评论”。
+
+```cpp linenums="1" title="类 GitHub Review 风格注解示例"
+if( useProvidedKeypoints )  // (1)!
+{
+    firstOctave = 0;
+    int maxOctave = INT_MIN; // (2)!
+    for( size_t i = 0; i < keypoints.size(); i++ )
+    {
+        int octave, layer;
+        float scale;
+        unpackOctave(keypoints[i], octave, layer, scale); // (3)!
+        firstOctave = std::min(firstOctave, octave);
+        maxOctave = std::max(maxOctave, octave);
+    }
+}
+```
+
+1. 进入该分支表示调用者传入了先验特征点，本次检测将按先验尺度信息决定金字塔构建策略$1$。
+2. `INT_MIN`用于确保第一次比较即可被真实`octave`值覆盖，避免遗漏最大倍频程。
+3. `unpackOctave`负责从`KeyPoint`编码字段中恢复`octave/layer/scale`，这是后续尺度对齐的前提。
+
 ```cpp linenums="1" title="SIFT特征提取&描述子计算实现"
 // sift_dispatch.cpp
 // 为保障代码连贯性，移除了安全检查和性能统计代码

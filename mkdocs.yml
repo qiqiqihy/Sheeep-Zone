@@ -8,6 +8,8 @@ theme:
   features:
     - navigation.tabs
     - search.suggest
+    - content.code.annotate
+    - content.code.copy
   font:
     text: Noto Sans SC
     code: Roboto Mono
