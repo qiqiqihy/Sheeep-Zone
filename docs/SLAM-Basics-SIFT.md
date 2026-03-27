@@ -183,20 +183,20 @@ OpenCV在`features2d`模块中提供了SIFT特征点检测与描述子计算[^op
 
 ```cpp linenums="1" title="SIFT实例化接口"
 static Ptr<SIFT> cv::SIFT::create(
-    int nfeatures            = 0,
-    int nOctaveLayers        = 3,
-    double contrastThreshold = 0.04,
-    double edgeThreshold     = 10,
-    double sigma             = 1.6
+  int nfeatures            = 0,
+  int nOctaveLayers        = 3,
+  double contrastThreshold = 0.04,
+  double edgeThreshold     = 10,
+  double sigma             = 1.6
 );
 
 static Ptr<SIFT> cv::SIFT::create(
-    int nfeatures,
-    int nOctaveLayers,
-    double contrastThreshold,
-    double edgeThreshold,
-    double sigma,
-    int descriptorType
+  int nfeatures,
+  int nOctaveLayers,
+  double contrastThreshold,
+  double edgeThreshold,
+  double sigma,
+  int descriptorType
 );
 ```
 
@@ -204,18 +204,18 @@ static Ptr<SIFT> cv::SIFT::create(
 `nOctaveLayers`：每倍频程的层数$s$，倍频程数由输入图像分辨率自动计算。  
 `contrastThreshold`：响应值阈值$T_\mathrm{res}$。  
 `edgeThreshold`：边缘效应阈值$T_\mathrm{edge}$。  
-`sigma`：第1倍频程初始高斯核$\sigma$。  
+`sigma`：初始倍频程高斯核$\sigma$。  
 `descriptorType`：描述子数据类型，支持`CV_32F`和`CV_8U`，默认为`CV_32F`。 
 
 ---
 
 ```cpp linenums="1" title="SIFT特征提取&描述子计算接口"
 virtual void cv::Feature2D::detectAndCompute(
-    InputArray image,
-    InputArray mask,
-    std::vector<KeyPoint>& keypoints,
-    OutputArray descriptors,
-    bool useProvidedKeypoints = false
+  InputArray image,
+  InputArray mask,
+  std::vector<KeyPoint>& keypoints,
+  OutputArray descriptors,
+  bool useProvidedKeypoints = false
 );
 ```
 
@@ -227,113 +227,169 @@ virtual void cv::Feature2D::detectAndCompute(
 
 ### 2.2 代码分析
 
-下面示例使用Material代码注解，将关键代码位置与解释绑定，阅读体验类似“代码行旁评论”。
-
-```cpp linenums="1" title="类 GitHub Review 风格注解示例"
-if( useProvidedKeypoints )  // (1)!
-{
-    firstOctave = 0;
-    int maxOctave = INT_MIN; // (2)!
-    for( size_t i = 0; i < keypoints.size(); i++ )
-    {
-        int octave, layer;
-        float scale;
-        unpackOctave(keypoints[i], octave, layer, scale); // (3)!
-        firstOctave = std::min(firstOctave, octave);
-        maxOctave = std::max(maxOctave, octave);
-    }
-}
-```
-
-1. 进入该分支表示调用者传入了先验特征点，本次检测将按先验尺度信息决定金字塔构建策略$1$。
-2. `INT_MIN`用于确保第一次比较即可被真实`octave`值覆盖，避免遗漏最大倍频程。
-3. `unpackOctave`负责从`KeyPoint`编码字段中恢复`octave/layer/scale`，这是后续尺度对齐的前提。
+#### `detectAndCompute`：主流程
 
 ```cpp linenums="1" title="SIFT特征提取&描述子计算实现"
 // sift_dispatch.cpp
 // 为保障代码连贯性，移除了安全检查和性能统计代码
 void SIFT_Impl::detectAndCompute(
-    InputArray _image, 
-    InputArray _mask,
-    std::vector<KeyPoint>& keypoints, 
-    OutputArray _descriptors,
-    bool useProvidedKeypoints) {
+  InputArray _image, InputArray _mask, 
+  std::vector<KeyPoint>& keypoints, OutputArray _descriptors,
+  bool useProvidedKeypoints) {
 
-    // 参数初始化：
-    //   初始倍频程firstOctave，为负则对原图上采样
-    //   先验倍频程数actualNOctaves
-    int firstOctave = -1, actualNOctaves = 0;
-    
-    // 从InputArray获取cv::Mat
-    Mat image = _image.getMat(), mask = _mask.getMat();
+  // ========== 1.预处理 ==========
 
-    // 先验点处理
-    if( useProvidedKeypoints )
-    {
-        firstOctave = 0;
-        int maxOctave = INT_MIN;
-        for( size_t i = 0; i < keypoints.size(); i++ )
-        {
-            int octave, layer;
-            float scale;
-            // 从先验点中解码octave, layer, scale信息
-            unpackOctave(keypoints[i], octave, layer, scale);
-            firstOctave = std::min(firstOctave, octave);
-            maxOctave = std::max(maxOctave, octave);
-        }
+  // 参数初始化：
+  //   初始倍频程firstOctave，0表示原图，-1表示对原图上采样
+  //   先验倍频程数actualNOctaves
+  int firstOctave = -1, actualNOctaves = 0;
+  
+  // 从InputArray获取cv::Mat
+  Mat image = _image.getMat(), mask = _mask.getMat();
 
-        firstOctave = std::min(firstOctave, 0);
-        actualNOctaves = maxOctave - firstOctave + 1;
+  // 先验点处理
+  if( useProvidedKeypoints ) {//(1)!
+    firstOctave = 0;
+    int maxOctave = INT_MIN;
+    for( size_t i = 0; i < keypoints.size(); i++ ) {
+      int octave, layer;
+      float scale;
+      // 从先验点中解码octave, layer, scale
+      unpackOctave(keypoints[i], octave, layer, scale);//(2)!
+      firstOctave = std::min(firstOctave, octave);
+      maxOctave = std::max(maxOctave, octave);
     }
-```
 
-有先验点时（`useProvidedKeypoints == true`），根据先验点确定初始倍频程`firstOctave`和先验倍频程数`actualNOctave`，前者决定是否对原图上采样，后者决定本次特征提取的倍频程数。
+    firstOctave = std::min(firstOctave, 0);
+    actualNOctaves = maxOctave - firstOctave + 1;
+  }
 
-```cpp linenums="36"
-    // 原图下采样
-    Mat base = createInitialImage(image, firstOctave < 0, (float)sigma);
-    
-    std::vector<Mat> gpyr;
-    int nOctaves = actualNOctaves > 0 ? 
-        actualNOctaves : 
-        cvRound(std::log((double)std::min(base.cols, base.rows)) / 
-                std::log(2.) - 2) - firstOctave;
+  // ========== 2.DoG金字塔构建 ==========
+  // 原始图上采样，高斯模糊
+  Mat base = createInitialImage(image, firstOctave < 0, (float)sigma);//(3)!
+  
+  std::vector<Mat> gpyr;
+  // 确定总倍频程数
+  int nOctaves = actualNOctaves > 0 ? 
+    actualNOctaves : 
+    cvRound(std::log((double)std::min(base.cols, base.rows)) / //(4)!
+            std::log(2.) - 2) - firstOctave;
 
-    buildGaussianPyramid(base, gpyr, nOctaves);
-```
+  // 构建高斯金字塔
+  buildGaussianPyramid(base, gpyr, nOctaves);
 
-```cpp linenums="43"
-    std::vector<Mat> dogpyr;
-    buildDoGPyramid(gpyr, dogpyr);
-    findScaleSpaceExtrema(gpyr, dogpyr, keypoints);
-    KeyPointsFilter::removeDuplicatedSorted( keypoints );
+  // 构建DoG金字塔
+  std::vector<Mat> dogpyr;
+  buildDoGPyramid(gpyr, dogpyr);
 
-    if( nfeatures > 0 )
-        KeyPointsFilter::retainBest(keypoints, nfeatures);
+  // 寻找局部极值
+  findScaleSpaceExtrema(gpyr, dogpyr, keypoints);
+  KeyPointsFilter::removeDuplicatedSorted( keypoints );
 
-    if( firstOctave < 0 )
-        for( size_t i = 0; i < keypoints.size(); i++ )
-        {
-            KeyPoint& kpt = keypoints[i];
-            float scale = 1.f/(float)(1 << -firstOctave);
-            kpt.octave = (kpt.octave & ~255) | ((kpt.octave + firstOctave) & 255);
-            kpt.pt *= scale;
-            kpt.size *= scale;
-        }
+  if(nfeatures > 0)
+    KeyPointsFilter::retainBest(keypoints, nfeatures);
 
-    if( !mask.empty() )
-        KeyPointsFilter::runByPixelsMask( keypoints, mask );
-
-    if( _descriptors.needed() )
-    {
-        int dsize = descriptorSize();
-        _descriptors.create((int)keypoints.size(), dsize, descriptor_type);
-
-        Mat descriptors = _descriptors.getMat();
-        calcDescriptors(gpyr, keypoints, descriptors, nOctaveLayers, firstOctave);
+  if(firstOctave < 0)
+    for( size_t i = 0; i < keypoints.size(); i++ ) {
+      KeyPoint& kpt = keypoints[i];
+      float scale = 1.f/(float)(1 << -firstOctave);
+      kpt.octave = (kpt.octave & ~255) | ((kpt.octave + firstOctave) & 255);
+      kpt.pt *= scale;
+      kpt.size *= scale;
     }
+
+  if(!mask.empty())
+    KeyPointsFilter::runByPixelsMask( keypoints, mask );
+
+  if(_descriptors.needed()) {
+    int dsize = descriptorSize();
+    _descriptors.create((int)keypoints.size(), dsize, descriptor_type);
+
+    Mat descriptors = _descriptors.getMat();
+    calcDescriptors(gpyr, keypoints, descriptors, nOctaveLayers, firstOctave);
+  }
 }
 ```
+
+1. 有先验点时（`useProvidedKeypoints == true`），根据先验点确定初始倍频程`firstOctave`和先验倍频程数`actualNOctave`，前者决定是否对原图上采样，后者决定本次特征提取的倍频程数。
+2. 详见[此处](#unpackOctave)
+3. 详见[此处](#createInitialImage)
+4. 记图像长宽为$w\times h$，则倍频程数为$\log_2(\min(w,h))-2$，$-2$为防止金字塔顶层图像过小，若对原始图像上采样则再$+1$
+
+#### `unpackOctave`：解码关键点 {#unpackOctave}
+
+```cpp linenums="1"
+static inline void unpackOctave(
+  const KeyPoint& kpt, int& octave, int& layer, float& scale) {
+    
+  octave = kpt.octave & 255;       // 提取低8位
+  layer = (kpt.octave >> 8) & 255; // 右移8位后提取低8位
+  octave = octave < 128 ? octave : (-128 | octave); // 恢复octave符号
+  scale = octave >= 0 ?            // 计算尺度(1)
+    1.f/(1 << octave) : 
+    (float)(1 << -octave);
+}
+```
+
+1. $\mathrm{scale}={2^{-\mathrm{octave}}}$
+
+将`octave`、`layer`和`scale`压缩至`KeyPoint`的`int octave`中存储
+
+#### `createInitialImage`：原始图像上采样 {#createInitialImage}
+
+```cpp linenums="1"
+static Mat createInitialImage(
+  const Mat& img, bool doubleImageSize, float sigma) {
+    
+  Mat gray, gray_fpt;
+  if(img.channels() == 3 || img.channels() == 4) {
+    // 多通道图转为灰度图
+    cvtColor(img, gray, COLOR_BGR2GRAY);
+    
+    // 转为float图
+    gray.convertTo(gray_fpt, CV_32F, 1, 0);//(1)!
+  }
+  else
+    // 转为float图
+    img.convertTo(gray_fpt, CV_32F, 1, 0);
+
+  // 初始图像高斯核sigma
+  float sig_diff;
+
+  if(doubleImageSize) {
+    // 计算初始高斯核
+    sig_diff = sqrtf(std::max(//(2)!
+      sigma * sigma - SIFT_INIT_SIGMA * SIFT_INIT_SIGMA * 4, 0.01f
+    ));
+
+    // 原始图像上采样
+    Mat dbl;
+    resize(gray_fpt, dbl, //(3)!
+           Size(gray_fpt.cols * 2, gray_fpt.rows * 2), 
+           0, 0, INTER_LINEAR
+    );
+
+    // 高斯模糊
+    Mat result;
+    GaussianBlur(dbl, result, Size(), sig_diff, sig_diff);
+    return result;
+  } else {
+    // 计算初始高斯核
+    sig_diff = sqrtf(std::max(
+      sigma * sigma - SIFT_INIT_SIGMA * SIFT_INIT_SIGMA, 0.01f
+    ));
+
+    // 高斯模糊
+    Mat result;
+    GaussianBlur(gray_fpt, result, Size(), sig_diff, sig_diff);
+    return result;
+  }
+}
+```
+
+1. `dst.covertTo(src, type, alpha, beta)`对应操作：$\mathrm{dst}(\mathbf{x})=\alpha\cdot\mathrm{type}(\mathrm{src}(\mathbf{x}))+\beta$，此处将灰度图转换为`float`类型。
+2. 计算初始高斯核，`SIFT_INIT_SIGMA = 0.5f`为原始图像默认带有的高斯模糊$\sigma$。
+3. `INTER_LINEAR`表示用双线性差值填充中间像素。
 
 ### 2.3 完整使用示例
 
@@ -360,13 +416,19 @@ int main(int argc, char **argv) {
   double constrastThreshold = 0.04;
   double edgeThreshold = 10;
   double sigma = 1.6;
-  auto sift = cv::SIFT::create(nfeatures, nOctaveLayers, constrastThreshold, edgeThreshold, sigma);
+  auto sift = cv::SIFT::create(
+    nfeatures, nOctaveLayers, constrastThreshold, 
+    edgeThreshold, sigma
+  );
 
   // 提取特征点，计算描述子
   std::vector<cv::KeyPoint> keypoints;
   cv::Mat descriptors;
   bool useProvidedKeypoints = false;
-  sift->detectAndCompute(img, cv::noArray(), keypoints, descriptors, useProvidedKeypoints);
+  sift->detectAndCompute(
+    img, cv::noArray(), keypoints, 
+    descriptors, useProvidedKeypoints
+  );
 
   cv::Mat display;
   cv::cvtColor(img, display, cv::COLOR_GRAY2BGR);
