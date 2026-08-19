@@ -6,13 +6,6 @@
 
 这个仓库不是传统应用代码，而是一个文档型静态站点。内容以 Markdown 形式组织，使用 MkDocs 构建，并通过 GitHub Pages 自动部署为公开网站。
 
-目标包括：
-
-- 记录 SLAM 相关理论和实践笔记
-- 分享算法原理与代码分析
-- 维护稳定的技术知识库结构
-- 让内容可以通过 GitHub Pages 轻松发布和分享
-
 ## 2. 仓库结构
 
 ```text
@@ -22,19 +15,15 @@ Sheeep-Zone/
 │       └── deploy.yml          # GitHub Pages 部署工作流
 ├── docs/
 │   ├── index.md                # 首页
-│   ├── SLAM-Basics-SIFT.md     # SIFT 文章
-│   ├── SLAM-Basics-GFTT.md     # GFTT 文章
-│   ├── SLAM-Basics-SURF.md     # SURF 文章
-│   ├── images/                 # 文章图片
+│   ├── *.md                    # 博客正文
+│   ├── images/                 # 图片资源
 │   ├── javascripts/
 │   └── stylesheets/
 ├── mkdocs.yml                  # MkDocs 配置
 ├── requirements.txt            # Python 依赖清单
-├── DEVELOPMENT.md              # 开发与发布流程说明
 ├── README.md                   # 项目说明
 ├── .gitignore                  # 忽略规则
-├── site/                       # 站点构建产物（自动生成）
-└── .venv/                      # 本地虚拟环境（本地使用）
+└── site/                       # MkDocs 生成的静态站点
 ```
 
 ## 3. 技术栈
@@ -80,21 +69,22 @@ mkdocs serve
 http://127.0.0.1:8000
 ```
 
+### 4.5 验证安装和本地构建
+
+```bash
+mkdocs --version
+mkdocs build --strict
+```
+
+`mkdocs build --strict` 会将站点生成到 `site/`，并在发现配置、链接或 Markdown 问题时报告错误。
+
 ## 5. 写作与维护规范
 
 ### 5.1 文章命名规范
 
 推荐使用以下命名：
 
-- `SLAM-Basics-SIFT.md`
-- `SLAM-Basics-GFTT.md`
-- `SLAM-Basics-SURF.md`
-
-规范要求：
-
-- 文件名统一使用大写英文 + 中划线 + 简短描述
-- 文章标题与文件名尽量一致
-- 每篇文章都要保持独立的主题边界
+- `板块名-文章名.md`
 
 ### 5.2 目录组织规范
 
@@ -106,48 +96,39 @@ http://127.0.0.1:8000
 
 ### 5.3 导航规范
 
-如果新增文章，需要在 `mkdocs.yml` 中同步更新 `nav` 配置：
+如果新增文章，需要在 `mkdocs.yml` 中同步更新 `nav` 配置，例如：
 
 ```yaml
 nav:
   - Home: index.md
   - SLAM Basics:
       - SIFT特征: SLAM-Basics-SIFT.md
-      - GFTT: SLAM-Basics-GFTT.md
-      - SURF: SLAM-Basics-SURF.md
+      - GFTT特征: SLAM-Basics-GFTT.md
+      - SURF特征: SLAM-Basics-SURF.md
 ```
 
-### 5.4 标题结构规范
+### 5.4 新增或修改文章
 
-建议文章使用统一结构：
+1. 在 `docs/` 下创建或修改 Markdown 文件。
+2. 如果文章需要显示在站点导航中，更新 `mkdocs.yml` 中的 `nav` 配置。
+3. 将图片、样式和脚本分别放入 `docs/images/`、`docs/stylesheets/` 和 `docs/javascripts/`。
+4. 使用 `mkdocs serve` 预览，并使用 `mkdocs build --strict` 验证构建。
 
-```markdown
-# 标题
-
-## 1. 背景与动机
-
-## 2. 基本概念
-
-## 3. 算法原理
-
-## 4. 代码分析
-
-## 5. 实验与结论
-
-## 6. 参考资料
-```
-
-这样便于站点导航、内容检索和长期维护。
+文章建议包含清晰的标题层级、代码语言标注、图片说明和参考资料。数学公式可使用 Markdown 公式语法。
 
 ## 6. 发布流程
 
 本仓库使用 GitHub Actions 自动部署到 GitHub Pages。流程如下：
 
-1. 提交代码到 `main` 分支
-2. GitHub Actions 自动触发
-3. 安装 Python 和依赖
-4. 运行 `mkdocs build --strict`
-5. 将构建产物部署到 GitHub Pages
+1. 在 `dev` 或 feature 分支开发并完成本地检查
+2. 合并到 `main` 分支
+3. GitHub Actions 自动触发
+4. 安装 Python 和 `requirements.txt` 中的依赖
+5. 运行 `mkdocs build --strict`
+6. 上传 `site/` 构建产物
+7. 使用 GitHub Pages Actions 部署站点
+
+对应的工作流文件是 `.github/workflows/deploy.yml`。通常不需要手动修改或提交 `site/`，部署时由 CI 自动生成。
 
 ## 7. 推荐提交规范
 
@@ -174,7 +155,21 @@ git push origin main
 - 每新增文章都同步更新导航和首页摘要
 - 参考资料、图片和代码示例尽量统一保存到 `docs/`
 
-## 9. 未来扩展方向
+## 9. 典型提交流程
+
+```bash
+git checkout -b dev
+# 编写或修改文档
+mkdocs serve
+# 本地严格构建检查
+mkdocs build --strict
+git add .
+git commit -m "docs: add new article"
+git push origin dev
+# 创建 PR，合并到 main 后自动发布
+```
+
+## 10. 未来扩展方向
 
 这个站点后续可以进一步扩展：
 
@@ -183,7 +178,3 @@ git push origin main
 - 增加文章标签和索引页
 - 引入更系统的知识图谱结构
 - 增加数学公式、代码案例和可视化说明
-
-## 10. 结论
-
-这个仓库适合长期维护为一个技术分享站点。它的价值不在于“代码量”，而在于“知识结构清晰、发布流程稳定、内容可持续演进”。只要遵守统一的文档规范和自动化部署流程，就能让这个站点长期保持可维护性和可访问性。

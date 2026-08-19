@@ -1,3 +1,8 @@
+---
+search:
+    exclude: true
+---
+
 # Sheeep's Zone 文档
 
 欢迎来到文档首页。

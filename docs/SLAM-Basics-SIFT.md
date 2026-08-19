@@ -2,12 +2,12 @@
 
 ## 0.概述
 
-SIFT特征[^sift]（Scale Invariant Feature Transform）是一种经典的局部特征描述算法，旨在从图像中提取对尺度缩放、旋转及光照变化具有较高鲁棒性的稳定特征点，常用于SLAM、三维重建等领域。SIFT特征核心流程包括四个阶段：
+SIFT特征[^sift]（Scale Invariant Feature Transform）是一种经典的局部特征描述算法，旨在从图像中提取对**尺度缩放**、**旋转**及**光照变化**具有高鲁棒性的特征点，常用于SLAM、三维重建等领域。SIFT特征的提取包括四个阶段：
 
-1. **尺度空间极值检测：**利用DoG函数构建尺度空间，并在多尺度下搜索候选特征点。  
-2. **特征点细化：**通过二阶Taylor展开细化特征点的位置与尺度，并剔除低对比度点及边缘点。  
+1. **尺度空间极值检测：**利用DoG函数构建尺度空间，在多尺度下搜索候选特征点。  
+2. **特征点细化：**通过二阶Taylor展开细化特征点的位置与尺度，剔除低对比度点及边缘点。  
 3. **方向计算：**基于邻域梯度直方图为特征点计算方向，赋予特征点旋转不变性。  
-4. **描述子计算：**基于特征点邻域信息构建128维描述子，作为后续特征匹配的依据。
+4. **描述子计算：**根据特征点邻域信息构建128维描述子，作为后续特征匹配的依据。
 
 ## 1. 理论基础
 
@@ -36,7 +36,7 @@ D(x,y,\sigma)&=(G(x,y,k\sigma)-G(x,y,\sigma))*I(x,y)\\[5pt]
 \end{aligned}
 \]
 
-采用DoG函数的原因有二：一是DoG函数可以简单地由尺度空间$L(x,y,\sigma)$计算，而$L(x,y,\sigma)$的获取是描述尺度空间必须进行的计算；二是DoG函数为尺度归一化LoG（Laplacian of Gaussian）函数$\sigma^2\nabla^2G$的近似，后者的局部极值被验证相较于梯度、Hessian和Harris响应函数可以产生最稳定的图像特征。
+使用DoG函数原因有二：一是DoG函数可以由尺度空间$L(x,y,\sigma)$简单地计算，且计算$L(x,y,\sigma)$是描述尺度空间必要的步骤；二是DoG函数为尺度归一化LoG（Laplacian of Gaussian）函数$\sigma^2\nabla^2G$的近似，后者的局部极值经验证相较于梯度、Hessian和Harris响应函数可以产生更稳定的图像特征。
 
 ??? note "DoG函数近似尺度归一化LoG函数推导"
     高斯核$G(x,y,\sigma)$为热扩散方程的解，即有：
@@ -59,7 +59,7 @@ D(x,y,\sigma)&=(G(x,y,k\sigma)-G(x,y,\sigma))*I(x,y)\\[5pt]
     \Rightarrow D(x,y,\sigma)\approx\sigma^2\nabla^2G*I(x,y)
     \]
 
-    由于$k-1$为常数，其不影响局部极值位置，当$k\to1$时，近似误差$\to0$。
+    $k-1$为常数，不影响局部极值位置。当$k\to1$时，近似误差$\to0$。
 
 DoG函数的构造如[图](#fig-dog){.fig-ref}所示，具体步骤如下：
 
@@ -73,7 +73,7 @@ DoG函数的构造如[图](#fig-dog){.fig-ref}所示，具体步骤如下：
     <figcaption>DoG函数构造</figcaption>
 </figure>
 
-DoG函数构造完成后，按照[图](#fig-extrema){.fig-ref}中的方式筛选局部极值点作为候选特征点，即候选特征点的响应值（DoG函数在该像素处的值）大于或小于上下两层和本层中相邻的26个点的响应值。
+DoG函数构造完成后，按照[图](#fig-extrema){.fig-ref}中的方式筛选局部极值点作为候选特征点，即候选特征点的响应值（DoG函数在该像素处的值）大于或小于上下两层和本层中相邻26个点的响应值。
 
 <figure id="fig-extrema" markdown="span">
     ![fig-extrema](images/sift-extrema.png){width="75%"}
@@ -84,7 +84,7 @@ DoG函数构造完成后，按照[图](#fig-extrema){.fig-ref}中的方式筛选
 
 ### 1.3 特征点细化
 
-对候选特征点进一步细化，可提高特征点稳定性且更易于匹配，为此，考虑DoG函数的二阶Taylor展开，即：
+对候选特征点进一步细化，可提高特征点稳定性，使之更易于匹配，为此，考虑DoG函数的二阶Taylor展开，即：
 
 \[
 D(x,y,\sigma)=D(\mathbf{x})\approx D(\mathbf{x}_0)+\frac{\partial D^\top}{\partial\mathbf{x}}(\mathbf{x}-\mathbf{x}_0)+\frac{1}{2}(\mathbf{x}-\mathbf{x}_0)^\top\frac{\partial^2D}{\partial\mathbf{x}^2}(\mathbf{x}-\mathbf{x}_0)
@@ -138,7 +138,7 @@ Hessian矩阵$\mathbf{H}$由特征点及其相邻像素差分近似。$\mathbf{H
 
 ### 1.4 特征点的方向计算
 
-为实现特征点的旋转不变形，根据特征点附近局部图像信息计算特征点的方向，进而在描述子计算时根据特征点的方向进行旋转校正。对每个特征点，选择尺度空间中与特征点尺度最接近的层计算方向，记该层图像为$L(x,y)$，定义梯度幅值$m(x,y)$和方向$\theta(x,y)$：
+为实现特征点的旋转不变形，根据特征点附近的图像信息计算特征点的方向，进而在描述子计算时进行旋转校正。对每个特征点，选择尺度空间中与特征点尺度最接近的层计算方向，记该层图像为$L(x,y)$，定义梯度幅值$m(x,y)$和方向$\theta(x,y)$：
 
 \[
 \begin{gathered}
@@ -182,6 +182,7 @@ m(x,y)=\sqrt{[L(x+1,y)-L(x-1,y)]^2+[L(x,y+1)-L(x,y-1)]^2}\\
 OpenCV在`features2d`模块中提供了SIFT特征点检测与描述子计算[^opencv_sift]，接口如下：
 
 ```cpp linenums="1" title="SIFT实例化接口"
+// [1/2]
 static Ptr<SIFT> cv::SIFT::create(
   int nfeatures            = 0,
   int nOctaveLayers        = 3,
@@ -190,6 +191,7 @@ static Ptr<SIFT> cv::SIFT::create(
   double sigma             = 1.6
 );
 
+// [2/2]
 static Ptr<SIFT> cv::SIFT::create(
   int nfeatures,
   int nOctaveLayers,
