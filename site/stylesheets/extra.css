@@ -66,7 +66,7 @@ h3, h4, h5, h6 { font-weight: 600 !important; }
 .mermaid .node polygon,
 .mermaid .node circle,
 .mermaid .node path {
-  fill: #dae8bc !important;
+  fill: #dae8fc !important;
   stroke: #6c8ebf !important;
 }
 
