@@ -46,12 +46,16 @@ h3, h4, h5, h6 { font-weight: 600 !important; }
 
 /* Mermaid 图表的统一细节样式 */
 .mermaid .nodeLabel,
-.mermaid .edgeLabel {
+.mermaid .edgeLabel,
+.mermaid .nodeLabel p,
+.mermaid .edgeLabel p {
   text-align: center !important;
+  line-height: 1.2 !important;
 }
 
 .mermaid .edgeLabel rect,
 .mermaid .edgeLabel .label,
+.mermaid .edgeLabel .labelBkg,
 .mermaid .edgeLabel p {
   fill: transparent !important;
   background: transparent !important;

@@ -3,7 +3,9 @@ import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.e
 mermaid.initialize({
   startOnLoad: false,
   flowchart: {
-    padding: 4,
+    padding: 10,
+    nodeSpacing: 30,
+    rankSpacing: 30,
   },
   themeVariables: {
     edgeLabelBackground: "transparent",
