@@ -44,6 +44,20 @@ h3, h4, h5, h6 { font-weight: 600 !important; }
   --topic-color-end: #1e3a8a 100%;
 }
 
+/* Mermaid 图表的统一细节样式 */
+.mermaid .nodeLabel,
+.mermaid .edgeLabel {
+  text-align: center !important;
+}
+
+.mermaid .edgeLabel rect,
+.mermaid .edgeLabel .label,
+.mermaid .edgeLabel p {
+  fill: transparent !important;
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
 /* 隐藏右侧目录标题 */
 .md-sidebar--secondary .md-nav__title {
   display: none;

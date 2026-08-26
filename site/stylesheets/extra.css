@@ -10,13 +10,52 @@ h2 { font-weight: 700 !important; }
 h3, h4, h5, h6 { font-weight: 600 !important; }
 */
 
-/* 专栏文字样式（渐变效果） */
+/* 专栏文字样式（各板块通过修饰类使用不同配色） */
 .topic-label {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--topic-color-start), var(--topic-color-end));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 600;
+}
+
+.topic-label--slam {
+  --topic-color-start: #667eea 0%;
+  --topic-color-end: #764ba2 100%;
+}
+
+.topic-label--1 {
+  --topic-color-start: #065f46 0%;
+  --topic-color-end: #1f2937 100%;
+}
+
+.topic-label--2 {
+  --topic-color-start: #9f1239 0%;
+  --topic-color-end: #4c0519 100%;
+}
+
+.topic-label--cs {
+  --topic-color-start: #92400e 0%;
+  --topic-color-end: #451a03 100%;
+}
+
+.topic-label--3 {
+  --topic-color-start: #0e7490 0%;
+  --topic-color-end: #1e3a8a 100%;
+}
+
+/* Mermaid 图表的统一细节样式 */
+.mermaid .nodeLabel,
+.mermaid .edgeLabel {
+  text-align: center !important;
+}
+
+.mermaid .edgeLabel rect,
+.mermaid .edgeLabel .label,
+.mermaid .edgeLabel p {
+  fill: transparent !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* 隐藏右侧目录标题 */

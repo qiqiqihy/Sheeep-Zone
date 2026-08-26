@@ -1,0 +1,5 @@
+flowchart LR
+    A["hello.c<br/>源文件"] -->|预处理| B["hello.i<br/>预处理文件"]
+    B -->|编译| C["hello.s<br/>汇编代码"]
+    C -->|汇编| D["hello.o<br/>目标文件"]
+    D -->|链接| E["hello<br/>可执行文件"]

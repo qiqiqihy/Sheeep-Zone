@@ -18,7 +18,7 @@
         <link rel="prev" href="..">
       
       
-        <link rel="next" href="../SLAM-Basics-GFTT/">
+        <link rel="next" href="../cs-ch1/">
       
       
         
@@ -221,6 +221,26 @@
   
   
   SLAM Basics
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../cs-ch1/" class="md-tabs__link">
+          
+  
+  
+  深入理解计算机系统
 
         </a>
       </li>
@@ -636,21 +656,42 @@
 
               
             
-              
-                
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
   
   
   
   
-    <li class="md-nav__item">
-      <a href="../SLAM-Basics-GFTT/" class="md-nav__link">
+    
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
     
   
-    GFTT
+    深入理解计算机系统
   
 
     
@@ -658,11 +699,19 @@
   
   
 
-      </a>
-    </li>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    深入理解计算机系统
   
 
-              
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
                 
@@ -671,14 +720,14 @@
   
   
     <li class="md-nav__item">
-      <a href="../SLAM-Basics-SURF/" class="md-nav__link">
+      <a href="../cs-ch1/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    SURF
+    Ch1.计算机系统漫游
   
 
     
@@ -951,14 +1000,14 @@
   
 
 
-<h1 id="slam-basics-sift"><span class="topic-label">SLAM Basics</span> | SIFT特征</h1>
+<h1 id="slam-basics-sift"><span class="topic-label topic-label--slam">SLAM Basics</span> | SIFT特征</h1>
 <h2 id="0">0.概述</h2>
-<p>SIFT特征<sup id="fnref:sift"><a class="footnote-ref" href="#fn:sift">1</a></sup>（Scale Invariant Feature Transform）是一种经典的局部特征描述算法，旨在从图像中提取对尺度缩放、旋转及光照变化具有较高鲁棒性的稳定特征点，常用于SLAM、三维重建等领域。SIFT特征核心流程包括四个阶段：</p>
+<p>SIFT特征<sup id="fnref:sift"><a class="footnote-ref" href="#fn:sift">1</a></sup>（Scale Invariant Feature Transform）是一种经典的局部特征描述算法，旨在从图像中提取对<strong>尺度缩放</strong>、<strong>旋转</strong>及<strong>光照变化</strong>具有高鲁棒性的特征点，常用于SLAM、三维重建等领域。SIFT特征的提取包括四个阶段：</p>
 <ol>
-<li><strong>尺度空间极值检测：</strong>利用DoG函数构建尺度空间，并在多尺度下搜索候选特征点。  </li>
-<li><strong>特征点细化：</strong>通过二阶Taylor展开细化特征点的位置与尺度，并剔除低对比度点及边缘点。  </li>
+<li><strong>尺度空间极值检测：</strong>利用DoG函数构建尺度空间，在多尺度下搜索候选特征点。  </li>
+<li><strong>特征点细化：</strong>通过二阶Taylor展开细化特征点的位置与尺度，剔除低对比度点及边缘点。  </li>
 <li><strong>方向计算：</strong>基于邻域梯度直方图为特征点计算方向，赋予特征点旋转不变性。  </li>
-<li><strong>描述子计算：</strong>基于特征点邻域信息构建128维描述子，作为后续特征匹配的依据。</li>
+<li><strong>描述子计算：</strong>根据特征点邻域信息构建128维描述子，作为后续特征匹配的依据。</li>
 </ol>
 <h2 id="1">1. 理论基础</h2>
 <h3 id="11">1.1 尺度空间</h3>
@@ -978,7 +1027,7 @@ D(x,y,\sigma)&amp;=(G(x,y,k\sigma)-G(x,y,\sigma))*I(x,y)\\[5pt]
              &amp;=L(x,y,k\sigma)-L(x,y,\sigma)
 \end{aligned}
 \]</div>
-<p>采用DoG函数的原因有二：一是DoG函数可以简单地由尺度空间<span class="arithmatex">\(L(x,y,\sigma)\)</span>计算，而<span class="arithmatex">\(L(x,y,\sigma)\)</span>的获取是描述尺度空间必须进行的计算；二是DoG函数为尺度归一化LoG（Laplacian of Gaussian）函数<span class="arithmatex">\(\sigma^2\nabla^2G\)</span>的近似，后者的局部极值被验证相较于梯度、Hessian和Harris响应函数可以产生最稳定的图像特征。</p>
+<p>使用DoG函数原因有二：一是DoG函数可以由尺度空间<span class="arithmatex">\(L(x,y,\sigma)\)</span>简单地计算，且计算<span class="arithmatex">\(L(x,y,\sigma)\)</span>是描述尺度空间必要的步骤；二是DoG函数为尺度归一化LoG（Laplacian of Gaussian）函数<span class="arithmatex">\(\sigma^2\nabla^2G\)</span>的近似，后者的局部极值经验证相较于梯度、Hessian和Harris响应函数可以产生更稳定的图像特征。</p>
 <details class="note">
 <summary>DoG函数近似尺度归一化LoG函数推导</summary>
 <p>高斯核<span class="arithmatex">\(G(x,y,\sigma)\)</span>为热扩散方程的解，即有：</p>
@@ -995,7 +1044,7 @@ D(x,y,\sigma)&amp;=(G(x,y,k\sigma)-G(x,y,\sigma))*I(x,y)\\[5pt]
 <div class="arithmatex">\[
 \Rightarrow D(x,y,\sigma)\approx\sigma^2\nabla^2G*I(x,y)
 \]</div>
-<p>由于<span class="arithmatex">\(k-1\)</span>为常数，其不影响局部极值位置，当<span class="arithmatex">\(k\to1\)</span>时，近似误差<span class="arithmatex">\(\to0\)</span>。</p>
+<p><span class="arithmatex">\(k-1\)</span>为常数，不影响局部极值位置。当<span class="arithmatex">\(k\to1\)</span>时，近似误差<span class="arithmatex">\(\to0\)</span>。</p>
 </details>
 <p>DoG函数的构造如<a class="fig-ref" href="#fig-dog">图</a>所示，具体步骤如下：</p>
 <ol>
@@ -1008,14 +1057,14 @@ D(x,y,\sigma)&amp;=(G(x,y,k\sigma)-G(x,y,\sigma))*I(x,y)\\[5pt]
     <img alt="fig-dog" src="../images/sift-dog.png" width="75%" />
     <figcaption>DoG函数构造</figcaption>
 </figure>
-<p>DoG函数构造完成后，按照<a class="fig-ref" href="#fig-extrema">图</a>中的方式筛选局部极值点作为候选特征点，即候选特征点的响应值（DoG函数在该像素处的值）大于或小于上下两层和本层中相邻的26个点的响应值。</p>
+<p>DoG函数构造完成后，按照<a class="fig-ref" href="#fig-extrema">图</a>中的方式筛选局部极值点作为候选特征点，即候选特征点的响应值（DoG函数在该像素处的值）大于或小于上下两层和本层中相邻26个点的响应值。</p>
 <figure id="fig-extrema">
     <img alt="fig-extrema" src="../images/sift-extrema.png" width="75%" />
     <figcaption>DoG局部极值</figcaption>
 </figure>
 <p>为了提取更多候选特征点，可对原始图像上采样作为第<span class="arithmatex">\(0\)</span>个倍频程的初始图像，即用线性插值将原始图像的长宽各扩大<span class="arithmatex">\(2\)</span>倍。假设原始图像的尺度为<span class="arithmatex">\(\sigma=0.5\)</span>（防止混叠的最小值），则上采样图像的等效尺度为<span class="arithmatex">\(\sigma=1.0\)</span>，无需额外平滑即可直接用于构造DoG函数。</p>
 <h3 id="13">1.3 特征点细化</h3>
-<p>对候选特征点进一步细化，可提高特征点稳定性且更易于匹配，为此，考虑DoG函数的二阶Taylor展开，即：</p>
+<p>对候选特征点进一步细化，可提高特征点稳定性，使之更易于匹配，为此，考虑DoG函数的二阶Taylor展开，即：</p>
 <div class="arithmatex">\[
 D(x,y,\sigma)=D(\mathbf{x})\approx D(\mathbf{x}_0)+\frac{\partial D^\top}{\partial\mathbf{x}}(\mathbf{x}-\mathbf{x}_0)+\frac{1}{2}(\mathbf{x}-\mathbf{x}_0)^\top\frac{\partial^2D}{\partial\mathbf{x}^2}(\mathbf{x}-\mathbf{x}_0)
 \]</div>
@@ -1051,7 +1100,7 @@ D(x,y,\sigma)=D(\mathbf{x})\approx D(\mathbf{x}_0)+\frac{\partial D^\top}{\parti
 \]</div>
 <p>的边缘特征点。</p>
 <h3 id="14">1.4 特征点的方向计算</h3>
-<p>为实现特征点的旋转不变形，根据特征点附近局部图像信息计算特征点的方向，进而在描述子计算时根据特征点的方向进行旋转校正。对每个特征点，选择尺度空间中与特征点尺度最接近的层计算方向，记该层图像为<span class="arithmatex">\(L(x,y)\)</span>，定义梯度幅值<span class="arithmatex">\(m(x,y)\)</span>和方向<span class="arithmatex">\(\theta(x,y)\)</span>：</p>
+<p>为实现特征点的旋转不变形，根据特征点附近的图像信息计算特征点的方向，进而在描述子计算时进行旋转校正。对每个特征点，选择尺度空间中与特征点尺度最接近的层计算方向，记该层图像为<span class="arithmatex">\(L(x,y)\)</span>，定义梯度幅值<span class="arithmatex">\(m(x,y)\)</span>和方向<span class="arithmatex">\(\theta(x,y)\)</span>：</p>
 <div class="arithmatex">\[
 \begin{gathered}
 m(x,y)=\sqrt{[L(x+1,y)-L(x-1,y)]^2+[L(x,y+1)-L(x,y-1)]^2}\\
@@ -1101,22 +1150,26 @@ m(x,y)=\sqrt{[L(x+1,y)-L(x-1,y)]^2+[L(x,y+1)-L(x,y-1)]^2}\\
 <span class="normal"><a href="#__codelineno-0-13">13</a></span>
 <span class="normal"><a href="#__codelineno-0-14">14</a></span>
 <span class="normal"><a href="#__codelineno-0-15">15</a></span>
-<span class="normal"><a href="#__codelineno-0-16">16</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="k">static</span><span class="w"> </span><span class="n">Ptr</span><span class="o">&lt;</span><span class="n">SIFT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cv</span><span class="o">::</span><span class="n">SIFT</span><span class="o">::</span><span class="n">create</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">nfeatures</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">nOctaveLayers</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">contrastThreshold</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.04</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">edgeThreshold</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">sigma</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="mf">1.6</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="p">);</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8"></a>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9"></a><span class="k">static</span><span class="w"> </span><span class="n">Ptr</span><span class="o">&lt;</span><span class="n">SIFT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cv</span><span class="o">::</span><span class="n">SIFT</span><span class="o">::</span><span class="n">create</span><span class="p">(</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">nfeatures</span><span class="p">,</span>
-</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">nOctaveLayers</span><span class="p">,</span>
-</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">contrastThreshold</span><span class="p">,</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">edgeThreshold</span><span class="p">,</span>
-</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">sigma</span><span class="p">,</span>
-</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">descriptorType</span>
-</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="p">);</span>
+<span class="normal"><a href="#__codelineno-0-16">16</a></span>
+<span class="normal"><a href="#__codelineno-0-17">17</a></span>
+<span class="normal"><a href="#__codelineno-0-18">18</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="c1">// [1/2]</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2"></a><span class="k">static</span><span class="w"> </span><span class="n">Ptr</span><span class="o">&lt;</span><span class="n">SIFT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cv</span><span class="o">::</span><span class="n">SIFT</span><span class="o">::</span><span class="n">create</span><span class="p">(</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">nfeatures</span><span class="w">            </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4"></a><span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">nOctaveLayers</span><span class="w">        </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5"></a><span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">contrastThreshold</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.04</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6"></a><span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">edgeThreshold</span><span class="w">     </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7"></a><span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">sigma</span><span class="w">             </span><span class="o">=</span><span class="w"> </span><span class="mf">1.6</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8"></a><span class="p">);</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9"></a>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10"></a><span class="c1">// [2/2]</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11"></a><span class="k">static</span><span class="w"> </span><span class="n">Ptr</span><span class="o">&lt;</span><span class="n">SIFT</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cv</span><span class="o">::</span><span class="n">SIFT</span><span class="o">::</span><span class="n">create</span><span class="p">(</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12"></a><span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">nfeatures</span><span class="p">,</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13"></a><span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">nOctaveLayers</span><span class="p">,</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14"></a><span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">contrastThreshold</span><span class="p">,</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15"></a><span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">edgeThreshold</span><span class="p">,</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16"></a><span class="w">  </span><span class="kt">double</span><span class="w"> </span><span class="n">sigma</span><span class="p">,</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17"></a><span class="w">  </span><span class="kt">int</span><span class="w"> </span><span class="n">descriptorType</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18"></a><span class="p">);</span>
 </span></code></pre></div></td></tr></table></div>
 <p><code>nfeatures</code>：最多保留的特征点数，<span class="arithmatex">\(0\)</span>表示不限，输出特征点按响应值排序。<br />
 <code>nOctaveLayers</code>：每倍频程的层数<span class="arithmatex">\(s\)</span>，倍频程数由输入图像分辨率自动计算。<br />
@@ -1595,7 +1648,7 @@ m(x,y)=\sqrt{[L(x+1,y)-L(x-1,y)]^2+[L(x,y+1)-L(x,y-1)]^2}\\
       
         <script src="../javascripts/figure-ref.js"></script>
       
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script src="../javascripts/mermaid-init.js" type="module"></script>
       
         <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
       
