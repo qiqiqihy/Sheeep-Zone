@@ -1,4 +1,4 @@
-# <span class="topic-label">SLAM Basics</span> | SIFT特征
+# <span class="topic-label topic-label--slam">SLAM Basics</span> | SIFT特征
 
 ## 0.概述
 

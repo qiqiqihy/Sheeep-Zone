@@ -11,5 +11,8 @@ search:
 
 - SLAM Basics
     - [SIFT特征](SLAM-Basics-SIFT.md)
-    - [GFTT](SLAM-Basics-GFTT.md)
-    - [SURF](SLAM-Basics-SURF.md)
+    <!-- - [GFTT](SLAM-Basics-GFTT.md) -->
+    <!-- - [SURF](SLAM-Basics-SURF.md) -->
+
+- 深入理解计算机系统
+    - [Ch1.计算机系统漫游](cs-ch1.md)

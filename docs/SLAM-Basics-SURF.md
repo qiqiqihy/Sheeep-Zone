@@ -1,4 +1,4 @@
-# <span class="topic-label">SLAM Basics</span> | SURF（Speeded-Up Robust Features）
+# <span class="topic-label topic-label--slam">SLAM Basics</span> | SURF（Speeded-Up Robust Features）
 
 ## 1. 理论基础
 
