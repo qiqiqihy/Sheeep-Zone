@@ -62,6 +62,14 @@ h3, h4, h5, h6 { font-weight: 600 !important; }
   background-color: transparent !important;
 }
 
+.mermaid .node rect,
+.mermaid .node polygon,
+.mermaid .node circle,
+.mermaid .node path {
+  fill: #dae8bc !important;
+  stroke: #6c8ebf !important;
+}
+
 /* 隐藏右侧目录标题 */
 .md-sidebar--secondary .md-nav__title {
   display: none;
@@ -80,6 +88,18 @@ h3, h4, h5, h6 { font-weight: 600 !important; }
 /* 全局正文首行缩进（仅段落） */
 .md-typeset p {
   text-indent: 0em;
+}
+
+/* 列表保留正文行距，但不额外使用段落之间的间距 */
+.md-typeset ol > li,
+.md-typeset ul > li {
+  margin: 0;
+  line-height: 2.0;
+}
+
+.md-typeset ol > li > p,
+.md-typeset ul > li > p {
+  margin: 0;
 }
 
 /* 图片标题自动编号（每篇文档内独立计数） */

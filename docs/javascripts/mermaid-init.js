@@ -8,6 +8,8 @@ mermaid.initialize({
     rankSpacing: 30,
   },
   themeVariables: {
+    primaryColor: "#dae8bc",
+    primaryBorderColor: "#6c8ebf",
     edgeLabelBackground: "transparent",
   },
 });
